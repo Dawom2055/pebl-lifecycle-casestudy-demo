@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { JetBrains_Mono, Public_Sans, Schibsted_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const display = Schibsted_Grotesk({ variable: "--font-schibsted", subsets: ["latin"], weight: ["600", "700", "800"] });
+const display = Schibsted_Grotesk({ variable: "--font-schibsted", subsets: ["latin"] });
 const body = Public_Sans({ variable: "--font-public", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const mono = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"], weight: ["500"] });
 
