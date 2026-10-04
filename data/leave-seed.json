@@ -1,0 +1,12 @@
+{
+  "_note": "Leave already taken this leave year before the demo starts (balances only). 'requests' is empty so the demo starts with no leave requests in the system.",
+  "takenBeforeDemo": {
+    "w-muhammad": { "vacation": 17, "sick": 3, "floating": 0, "birthday": 0, "volunteer": 0 },
+    "w-daniel": { "vacation": 12, "sick": 2, "floating": 1, "birthday": 0, "volunteer": 0 },
+    "w-priya": { "vacation": 9, "sick": 1, "floating": 0, "birthday": 1, "volunteer": 0 },
+    "w-sophie": { "vacation": 7, "sick": 0, "floating": 0, "birthday": 0, "volunteer": 1 },
+    "w-lukas": { "vacation": 19, "sick": 4, "floating": 0, "birthday": 0, "volunteer": 0 },
+    "w-kenji": { "vacation": 6, "sick": 0, "floating": 0, "birthday": 0, "volunteer": 0 }
+  },
+  "requests": []
+}

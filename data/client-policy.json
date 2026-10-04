@@ -1,0 +1,42 @@
+{
+  "_note": "Layer 2: Lumen Robotics' own policy, set at onboarding from Pebl's country templates. A client can be stricter than local law, never looser. Amounts are per currency so each country's workers are checked in their own payroll currency.",
+  "version": "2026.3",
+  "effectiveFrom": "2026-09-01",
+  "expenses": {
+    "mealCapPerPerson": { "GBP": 50, "USD": 60, "CAD": 70, "EUR": 55, "JPY": 8000 },
+    "borderlineBandPct": 95,
+    "submitWithinDays": 30,
+    "preApprovalOverUSD": 500,
+    "noAlcohol": true,
+    "flightClass": "economy",
+    "autoClearThreshold": { "GBP": 75, "USD": 100, "CAD": 125, "EUR": 85, "JPY": 12000 },
+    "optInAutoApproveUnder": null,
+    "alwaysReviewCategories": ["other"],
+    "reimburseMileage": true,
+    "anomalyMultiplier": 3
+  },
+  "leave": {
+    "vacationDays": { "UK": 25, "US": 20, "DE": 28, "JP": 15, "CA": 15 },
+    "carryoverMaxDays": 3,
+    "sickPaidDays": 10,
+    "noticeDays": 14,
+    "blackouts": [{ "start": "2026-11-02", "end": "2026-11-06", "label": "Q4 product launch week" }],
+    "maxConsecutiveDays": 15,
+    "hrReviewOverDays": 15,
+    "autoApproveVacationUpToDays": null,
+    "bereavementDays": 5,
+    "unpaidShortMaxDays": 5,
+    "perks": {
+      "floating": { "days": 1, "tier": "manager" },
+      "birthday": { "days": 1, "tier": "auto" },
+      "volunteer": { "days": 2, "tier": "manager" }
+    }
+  },
+  "overtime": {
+    "UK": { "allowed": true, "monthlyLimit": 20, "annualLimit": 160, "mode": "pre_approval", "monthlyBudget": 4000, "premiumPct": 25 },
+    "DE": { "allowed": true, "monthlyLimit": 16, "annualLimit": 120, "mode": "pre_approval", "monthlyBudget": 3000, "premiumPct": 25 },
+    "US": { "allowed": true, "monthlyLimit": 20, "annualLimit": 160, "mode": "pre_approval", "monthlyBudget": 3500, "premiumPct": 50 },
+    "JP": { "allowed": true, "monthlyLimit": 20, "annualLimit": 200, "mode": "pre_approval", "monthlyBudget": 350000, "premiumPct": 25, "article36OnFile": true },
+    "CA": { "allowed": true, "monthlyLimit": 20, "annualLimit": 160, "mode": "pre_approval", "monthlyBudget": 3000, "premiumPct": 50 }
+  }
+}

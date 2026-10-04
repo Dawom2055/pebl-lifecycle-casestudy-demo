@@ -1,0 +1,4 @@
+{
+  "_note": "Requests already in the system when the demo starts. Empty so the demo starts blank; anything added here runs through the same pipeline (rules engine and risk router) at load time, and 'decisions' replays what people did afterwards.",
+  "expenses": []
+}

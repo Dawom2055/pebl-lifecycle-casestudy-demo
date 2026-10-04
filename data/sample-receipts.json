@@ -1,0 +1,732 @@
+{
+  "_note": "Demo receipts with a pre-computed AI read (value + confidence per field), so the demo works without an API key. Uploading a real photo sends it to Claude instead. Merchants and tax numbers are fictional.",
+  "receipts": [
+    {
+      "id": "rcpt-client-dinner",
+      "workerId": "w-muhammad",
+      "label": "Client dinner",
+      "scenario": "Clean receipt. Clears every check and lands on the client admin's card as a one-tap approval.",
+      "expectedOutcome": "auto_clear",
+      "note": "Client dinner with Harbour Logistics to scope the Q4 pilot",
+      "receipt": {
+        "merchant": "Marlow & Finch Grill",
+        "address": "14 Wellington St, London WC2E",
+        "date": "2026-10-02",
+        "time": "20:41",
+        "currency": "GBP",
+        "lines": [
+          { "desc": "Set menu x2", "amount": 38.0 },
+          { "desc": "Sparkling water x2", "amount": 7.0 }
+        ],
+        "total": 45.0,
+        "taxId": "GB 284 1937 66",
+        "covers": 2
+      },
+      "read": {
+        "merchant": { "value": "Marlow & Finch Grill", "confidence": 0.98 },
+        "amount": { "value": 45.0, "confidence": 0.99 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-10-02", "confidence": 0.97 },
+        "taxId": { "value": "GB 284 1937 66", "confidence": 0.95 },
+        "category": { "value": "meals", "confidence": 0.96 },
+        "attendees": { "value": 2, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-missing-vat",
+      "workerId": "w-muhammad",
+      "label": "Lunch, no VAT number",
+      "scenario": "The photo cut off the VAT number. A problem the worker can fix, so it goes back to them before anyone else sees it.",
+      "expectedOutcome": "back_to_worker",
+      "retakeId": "rcpt-missing-vat-retake",
+      "note": "Working lunch during the platform offsite",
+      "receipt": {
+        "merchant": "Station Café",
+        "address": "King's Cross, London N1C",
+        "date": "2026-10-03",
+        "time": "12:58",
+        "currency": "GBP",
+        "lines": [
+          { "desc": "Chicken wrap", "amount": 7.45 },
+          { "desc": "Flat white", "amount": 3.6 },
+          { "desc": "Fruit pot", "amount": 1.35 }
+        ],
+        "total": 12.4,
+        "taxId": null,
+        "covers": 1,
+        "cropped": true
+      },
+      "read": {
+        "merchant": { "value": "Station Café", "confidence": 0.97 },
+        "amount": { "value": 12.4, "confidence": 0.98 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-10-03", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 1, "confidence": 0.92 }
+      }
+    },
+    {
+      "id": "rcpt-missing-vat-retake",
+      "workerId": "w-muhammad",
+      "hidden": true,
+      "label": "Lunch, retaken photo",
+      "scenario": "The retaken photo shows the VAT number.",
+      "expectedOutcome": "auto_clear",
+      "note": "Working lunch during the platform offsite",
+      "receipt": {
+        "merchant": "Station Café",
+        "address": "King's Cross, London N1C",
+        "date": "2026-10-03",
+        "time": "12:58",
+        "currency": "GBP",
+        "lines": [
+          { "desc": "Chicken wrap", "amount": 7.45 },
+          { "desc": "Flat white", "amount": 3.6 },
+          { "desc": "Fruit pot", "amount": 1.35 }
+        ],
+        "total": 12.4,
+        "taxId": "GB 731 0482 19",
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "Station Café", "confidence": 0.97 },
+        "amount": { "value": 12.4, "confidence": 0.98 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-10-03", "confidence": 0.96 },
+        "taxId": { "value": "GB 731 0482 19", "confidence": 0.95 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 1, "confidence": 0.92 }
+      }
+    },
+    {
+      "id": "rcpt-team-dinner",
+      "workerId": "w-muhammad",
+      "label": "Team dinner",
+      "scenario": "Over the £75 auto-clear amount, so Pebl HR reviews it. It's also 4x Muhammad's usual meal spend, which HR sees as a note.",
+      "expectedOutcome": "hr_exception",
+      "note": "Launch dinner for the platform team",
+      "receipt": {
+        "merchant": "Ember & Oak Steakhouse",
+        "address": "1 Bishopsgate, London EC2N",
+        "date": "2026-10-01",
+        "time": "21:15",
+        "currency": "GBP",
+        "lines": [
+          { "desc": "Sharing menu x4", "amount": 156.0 },
+          { "desc": "Soft drinks x4", "amount": 14.0 },
+          { "desc": "Service", "amount": 10.0 }
+        ],
+        "total": 180.0,
+        "taxId": "GB 902 5513 07",
+        "covers": 4
+      },
+      "read": {
+        "merchant": { "value": "Ember & Oak Steakhouse", "confidence": 0.97 },
+        "amount": { "value": 180.0, "confidence": 0.98 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-10-01", "confidence": 0.97 },
+        "taxId": { "value": "GB 902 5513 07", "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 4, "confidence": 0.88 }
+      }
+    },
+    {
+      "id": "rcpt-duplicate",
+      "workerId": "w-muhammad",
+      "label": "Shared dinner (already claimed)",
+      "scenario": "Submit Daniel's copy of this dinner first. The duplicate check runs across all of the client's workers, so Muhammad's claim then goes to HR.",
+      "expectedOutcome": "hr_exception",
+      "note": "Dinner with Daniel after the infra review",
+      "receipt": {
+        "merchant": "Spice Route Kitchen",
+        "address": "7 Boundary St, London E2",
+        "date": "2026-09-30",
+        "time": "19:52",
+        "currency": "GBP",
+        "lines": [
+          { "desc": "Thali x2", "amount": 52.0 },
+          { "desc": "Small plates", "amount": 31.0 },
+          { "desc": "Lassi x2", "amount": 13.0 }
+        ],
+        "total": 96.0,
+        "taxId": "GB 455 2071 83",
+        "covers": 2
+      },
+      "read": {
+        "merchant": { "value": "Spice Route Kitchen", "confidence": 0.98 },
+        "amount": { "value": 96.0, "confidence": 0.99 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-09-30", "confidence": 0.97 },
+        "taxId": { "value": "GB 455 2071 83", "confidence": 0.95 },
+        "category": { "value": "meals", "confidence": 0.96 },
+        "attendees": { "value": 2, "confidence": 0.91 }
+      }
+    },
+    {
+      "id": "rcpt-paris-taxi",
+      "workerId": "w-muhammad",
+      "label": "Taxi in Paris (euros)",
+      "scenario": "Foreign currency. UK rules still apply because that's where Muhammad is employed; the amount is converted and paid in pounds, with both amounts shown.",
+      "expectedOutcome": "auto_clear",
+      "note": "Taxi from Gare du Nord to the customer site",
+      "receipt": {
+        "merchant": "Taxi Parisien G7",
+        "address": "Paris 75010",
+        "date": "2026-09-28",
+        "time": "09:12",
+        "currency": "EUR",
+        "lines": [{ "desc": "Fare, Gare du Nord to La Défense", "amount": 38.0 }],
+        "total": 38.0,
+        "taxId": "FR 41 512 093 448",
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "Taxi Parisien G7", "confidence": 0.93 },
+        "amount": { "value": 38.0, "confidence": 0.97 },
+        "currency": { "value": "EUR", "confidence": 0.98 },
+        "date": { "value": "2026-09-28", "confidence": 0.95 },
+        "taxId": { "value": "FR 41 512 093 448", "confidence": 0.9 },
+        "category": { "value": "travel", "confidence": 0.97 },
+        "attendees": { "value": 1, "confidence": 0.95 }
+      }
+    },
+    {
+      "id": "rcpt-daniel-train",
+      "workerId": "w-daniel",
+      "label": "Train to Manchester",
+      "scenario": "UK travel with a VAT number, under the £75 auto-clear amount. Clears every check and lands on the client admin's card.",
+      "expectedOutcome": "auto_clear",
+      "note": "Train to the Manchester data-centre visit",
+      "receipt": {
+        "merchant": "Northline Rail",
+        "address": "Euston Station, London NW1",
+        "date": "2026-10-06",
+        "time": "07:42",
+        "currency": "GBP",
+        "lines": [{ "desc": "Off-peak return, London–Manchester", "amount": 62.4 }],
+        "total": 62.4,
+        "taxId": "GB 812 3304 51",
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "Northline Rail", "confidence": 0.97 },
+        "amount": { "value": 62.4, "confidence": 0.98 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-10-06", "confidence": 0.96 },
+        "taxId": { "value": "GB 812 3304 51", "confidence": 0.93 },
+        "category": { "value": "travel", "confidence": 0.95 },
+        "attendees": { "value": 1, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-daniel-hotel",
+      "workerId": "w-daniel",
+      "label": "Hotel in Manchester",
+      "scenario": "UK hotels aren't unlocked yet. Every check passes, but HR still decides in shadow mode, and the system records that it would have auto-cleared it.",
+      "expectedOutcome": "hr_exception",
+      "note": "Overnight stay for the data-centre visit",
+      "receipt": {
+        "merchant": "Canal Street Hotel",
+        "address": "Canal St, Manchester M1",
+        "date": "2026-10-07",
+        "time": "08:05",
+        "currency": "GBP",
+        "lines": [
+          { "desc": "Room, 1 night", "amount": 64 },
+          { "desc": "Breakfast", "amount": 9.5 }
+        ],
+        "total": 73.5,
+        "taxId": "GB 640 2198 37",
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "Canal Street Hotel", "confidence": 0.97 },
+        "amount": { "value": 73.5, "confidence": 0.98 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-10-07", "confidence": 0.96 },
+        "taxId": { "value": "GB 640 2198 37", "confidence": 0.93 },
+        "category": { "value": "lodging", "confidence": 0.95 },
+        "attendees": { "value": 1, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-daniel-shared-dinner",
+      "workerId": "w-daniel",
+      "label": "Shared dinner with Muhammad",
+      "scenario": "Over the £75 auto-clear amount, so Pebl HR reviews it. Submit this first, then try Muhammad's copy of the same receipt to see the duplicate check.",
+      "expectedOutcome": "hr_exception",
+      "note": "Dinner with Muhammad after the infra review",
+      "receipt": {
+        "merchant": "Spice Route Kitchen",
+        "address": "7 Boundary St, London E2",
+        "date": "2026-09-30",
+        "time": "19:52",
+        "currency": "GBP",
+        "lines": [
+          { "desc": "Thali x2", "amount": 52 },
+          { "desc": "Small plates", "amount": 31 },
+          { "desc": "Lassi x2", "amount": 13 }
+        ],
+        "total": 96,
+        "taxId": "GB 455 2071 83",
+        "covers": 2
+      },
+      "read": {
+        "merchant": { "value": "Spice Route Kitchen", "confidence": 0.98 },
+        "amount": { "value": 96, "confidence": 0.99 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-09-30", "confidence": 0.97 },
+        "taxId": { "value": "GB 455 2071 83", "confidence": 0.95 },
+        "category": { "value": "meals", "confidence": 0.96 },
+        "attendees": { "value": 2, "confidence": 0.91 }
+      }
+    },
+    {
+      "id": "rcpt-priya-lunch",
+      "workerId": "w-priya",
+      "label": "Lunch, no tax number",
+      "scenario": "The US has no VAT-style number rule, so a receipt without one clears every check. The same receipt would go back to a UK worker.",
+      "expectedOutcome": "auto_clear",
+      "note": "Working lunch during the design review",
+      "receipt": {
+        "merchant": "Hudson Street Deli",
+        "address": "212 Hudson St, New York, NY 10013",
+        "date": "2026-10-05",
+        "time": "12:31",
+        "currency": "USD",
+        "lines": [
+          { "desc": "Turkey club", "amount": 14.5 },
+          { "desc": "Iced tea", "amount": 4.25 },
+          { "desc": "Sales tax", "amount": 1.66 }
+        ],
+        "total": 20.41,
+        "taxId": null,
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "Hudson Street Deli", "confidence": 0.97 },
+        "amount": { "value": 20.41, "confidence": 0.98 },
+        "currency": { "value": "USD", "confidence": 0.99 },
+        "date": { "value": "2026-10-05", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 1, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-priya-dinner",
+      "workerId": "w-priya",
+      "label": "Candidate dinner over the cap",
+      "scenario": "Over the $100 auto-clear amount, so Pebl HR reviews it. It's also about $89 per person, over the $60 meal cap, which HR sees as a note.",
+      "expectedOutcome": "hr_exception",
+      "note": "Dinner with two design candidates after the final round",
+      "receipt": {
+        "merchant": "Lark & Larder",
+        "address": "Greenwich Ave, New York, NY 10014",
+        "date": "2026-10-02",
+        "time": "19:48",
+        "currency": "USD",
+        "lines": [
+          { "desc": "Tasting menu x3", "amount": 195 },
+          { "desc": "Sparkling water", "amount": 12 },
+          { "desc": "Sales tax", "amount": 18.37 },
+          { "desc": "Tip", "amount": 41 }
+        ],
+        "total": 266.37,
+        "taxId": null,
+        "covers": 3
+      },
+      "read": {
+        "merchant": { "value": "Lark & Larder", "confidence": 0.97 },
+        "amount": { "value": 266.37, "confidence": 0.98 },
+        "currency": { "value": "USD", "confidence": 0.99 },
+        "date": { "value": "2026-10-02", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 3, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-sophie-coffee",
+      "workerId": "w-sophie",
+      "label": "Coffee under C$30",
+      "scenario": "No GST/HST number, but Canada only requires one from C$30, so this clears every check.",
+      "expectedOutcome": "auto_clear",
+      "note": "Coffee with the Desjardins account team",
+      "receipt": {
+        "merchant": "Café Olimpico",
+        "address": "Rue Saint-Viateur O, Montréal, QC",
+        "date": "2026-10-07",
+        "time": "08:55",
+        "currency": "CAD",
+        "lines": [
+          { "desc": "Latte x2", "amount": 11 },
+          { "desc": "Croissant x2", "amount": 8.5 },
+          { "desc": "TPS/TVQ", "amount": 2.92 }
+        ],
+        "total": 22.42,
+        "taxId": null,
+        "covers": 2
+      },
+      "read": {
+        "merchant": { "value": "Café Olimpico", "confidence": 0.97 },
+        "amount": { "value": 22.42, "confidence": 0.98 },
+        "currency": { "value": "CAD", "confidence": 0.99 },
+        "date": { "value": "2026-10-07", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 2, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-sophie-lunch",
+      "workerId": "w-sophie",
+      "label": "Client lunch, no GST/HST number",
+      "scenario": "C$80 needs the supplier's GST/HST number and the photo cut it off. Goes back to Sophie to retake before anyone else sees it.",
+      "expectedOutcome": "back_to_worker",
+      "retakeId": "rcpt-sophie-lunch-retake",
+      "note": "Quarterly review lunch with a customer",
+      "receipt": {
+        "merchant": "Bistro Le Saint-Denis",
+        "address": "Rue Saint-Denis, Montréal, QC H2X",
+        "date": "2026-10-06",
+        "time": "12:45",
+        "currency": "CAD",
+        "lines": [
+          { "desc": "Table d'hôte x2", "amount": 64 },
+          { "desc": "Sparkling water", "amount": 6 },
+          { "desc": "TPS/TVQ", "amount": 10.48 }
+        ],
+        "total": 80.48,
+        "taxId": null,
+        "covers": 2,
+        "cropped": true
+      },
+      "read": {
+        "merchant": { "value": "Bistro Le Saint-Denis", "confidence": 0.97 },
+        "amount": { "value": 80.48, "confidence": 0.98 },
+        "currency": { "value": "CAD", "confidence": 0.99 },
+        "date": { "value": "2026-10-06", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 2, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-sophie-lunch-retake",
+      "workerId": "w-sophie",
+      "hidden": true,
+      "label": "Client lunch, retaken photo",
+      "scenario": "The retaken photo shows the GST/HST number.",
+      "expectedOutcome": "auto_clear",
+      "note": "Quarterly review lunch with a customer",
+      "receipt": {
+        "merchant": "Bistro Le Saint-Denis",
+        "address": "Rue Saint-Denis, Montréal, QC H2X",
+        "date": "2026-10-06",
+        "time": "12:45",
+        "currency": "CAD",
+        "lines": [
+          { "desc": "Table d'hôte x2", "amount": 64 },
+          { "desc": "Sparkling water", "amount": 6 },
+          { "desc": "TPS/TVQ", "amount": 10.48 }
+        ],
+        "total": 80.48,
+        "taxId": "GST 81427 3390 RT0001",
+        "covers": 2
+      },
+      "read": {
+        "merchant": { "value": "Bistro Le Saint-Denis", "confidence": 0.97 },
+        "amount": { "value": 80.48, "confidence": 0.98 },
+        "currency": { "value": "CAD", "confidence": 0.99 },
+        "date": { "value": "2026-10-06", "confidence": 0.96 },
+        "taxId": { "value": "GST 81427 3390 RT0001", "confidence": 0.93 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 2, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-lukas-train",
+      "workerId": "w-lukas",
+      "label": "Train to Munich",
+      "scenario": "Germany only needs a tax number on invoices over €250, so this passes every check. German travel is still in shadow mode: HR decides, and the system records that it would have auto-cleared it.",
+      "expectedOutcome": "hr_exception",
+      "note": "Train to the Munich actuator supplier",
+      "receipt": {
+        "merchant": "Spree Express Rail",
+        "address": "Berlin Hauptbahnhof, 10557 Berlin",
+        "date": "2026-10-05",
+        "time": "06:58",
+        "currency": "EUR",
+        "lines": [{ "desc": "Saver fare, Berlin–München", "amount": 79.9 }],
+        "total": 79.9,
+        "taxId": null,
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "Spree Express Rail", "confidence": 0.97 },
+        "amount": { "value": 79.9, "confidence": 0.98 },
+        "currency": { "value": "EUR", "confidence": 0.99 },
+        "date": { "value": "2026-10-05", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.94 },
+        "category": { "value": "travel", "confidence": 0.95 },
+        "attendees": { "value": 1, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-lukas-dinner",
+      "workerId": "w-lukas",
+      "label": "Team dinner over €250, no tax number",
+      "scenario": "Over €250, so German rules need the supplier's tax number, and the receipt doesn't show one. Goes back to Lukas to fix first.",
+      "expectedOutcome": "back_to_worker",
+      "note": "Hardware team dinner after the prototype milestone",
+      "receipt": {
+        "merchant": "Brauhaus am Kanal",
+        "address": "Paul-Lincke-Ufer, 10999 Berlin",
+        "date": "2026-10-02",
+        "time": "20:10",
+        "currency": "EUR",
+        "lines": [
+          { "desc": "Menu x6", "amount": 252 },
+          { "desc": "Alcohol-free drinks x6", "amount": 39 }
+        ],
+        "total": 291,
+        "taxId": null,
+        "covers": 6,
+        "cropped": true
+      },
+      "read": {
+        "merchant": { "value": "Brauhaus am Kanal", "confidence": 0.97 },
+        "amount": { "value": 291, "confidence": 0.98 },
+        "currency": { "value": "EUR", "confidence": 0.99 },
+        "date": { "value": "2026-10-02", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 6, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-kenji-taxi",
+      "workerId": "w-kenji",
+      "label": "Taxi in Nagoya",
+      "scenario": "Under ¥30,000, so no invoice number is needed and every check passes. Japanese travel is still in shadow mode, so HR decides and the system records what it would have done.",
+      "expectedOutcome": "hr_exception",
+      "note": "Taxi from Nagoya Station to the customer's plant",
+      "receipt": {
+        "merchant": "Sakura Kotsu Taxi",
+        "address": "Nakamura-ku, Nagoya",
+        "date": "2026-10-06",
+        "time": "08:20",
+        "currency": "JPY",
+        "lines": [{ "desc": "Fare, Nagoya Sta. to customer site", "amount": 3860 }],
+        "total": 3860,
+        "taxId": null,
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "Sakura Kotsu Taxi", "confidence": 0.97 },
+        "amount": { "value": 3860, "confidence": 0.98 },
+        "currency": { "value": "JPY", "confidence": 0.99 },
+        "date": { "value": "2026-10-06", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.94 },
+        "category": { "value": "travel", "confidence": 0.95 },
+        "attendees": { "value": 1, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-kenji-dinner",
+      "workerId": "w-kenji",
+      "label": "Customer dinner, no invoice number",
+      "scenario": "¥36,300 is over Japan's ¥30,000 threshold, so the supplier's registered invoice number is required. The photo cut it off, so it goes back to Kenji.",
+      "expectedOutcome": "back_to_worker",
+      "retakeId": "rcpt-kenji-dinner-retake",
+      "note": "Dinner with the customer's plant engineers",
+      "receipt": {
+        "merchant": "Izakaya Tsubaki",
+        "address": "Sakae, Naka-ku, Nagoya",
+        "date": "2026-10-01",
+        "time": "19:30",
+        "currency": "JPY",
+        "lines": [
+          { "desc": "Course menu x5", "amount": 30000 },
+          { "desc": "Soft drinks x5", "amount": 3000 },
+          { "desc": "Consumption tax", "amount": 3300 }
+        ],
+        "total": 36300,
+        "taxId": null,
+        "covers": 5,
+        "cropped": true
+      },
+      "read": {
+        "merchant": { "value": "Izakaya Tsubaki", "confidence": 0.97 },
+        "amount": { "value": 36300, "confidence": 0.98 },
+        "currency": { "value": "JPY", "confidence": 0.99 },
+        "date": { "value": "2026-10-01", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 5, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-kenji-dinner-retake",
+      "workerId": "w-kenji",
+      "hidden": true,
+      "label": "Customer dinner, retaken photo",
+      "scenario": "The retaken photo shows the invoice number.",
+      "expectedOutcome": "hr_exception",
+      "note": "Dinner with the customer's plant engineers",
+      "receipt": {
+        "merchant": "Izakaya Tsubaki",
+        "address": "Sakae, Naka-ku, Nagoya",
+        "date": "2026-10-01",
+        "time": "19:30",
+        "currency": "JPY",
+        "lines": [
+          { "desc": "Course menu x5", "amount": 30000 },
+          { "desc": "Soft drinks x5", "amount": 3000 },
+          { "desc": "Consumption tax", "amount": 3300 }
+        ],
+        "total": 36300,
+        "taxId": "T7180001094523",
+        "covers": 5
+      },
+      "read": {
+        "merchant": { "value": "Izakaya Tsubaki", "confidence": 0.97 },
+        "amount": { "value": 36300, "confidence": 0.98 },
+        "currency": { "value": "JPY", "confidence": 0.99 },
+        "date": { "value": "2026-10-01", "confidence": 0.96 },
+        "taxId": { "value": "T7180001094523", "confidence": 0.93 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 5, "confidence": 0.9 }
+      }
+    },
+    {
+      "id": "rcpt-solo-dinner-over-cap",
+      "workerId": "w-muhammad",
+      "label": "Dinner over the meal cap",
+      "scenario": "£62 for one person, over Lumen's £50 meal cap but under £75. Compliant, so it skips Pebl HR and goes to the client admin with a disclaimer.",
+      "expectedOutcome": "admin_disclaimer",
+      "note": "Dinner while working late on the Q4 pilot",
+      "receipt": {
+        "merchant": "Larch & Lantern",
+        "address": "Shoreditch High St, London E1",
+        "date": "2026-10-06",
+        "time": "21:05",
+        "currency": "GBP",
+        "lines": [
+          { "desc": "Tasting plate", "amount": 48 },
+          { "desc": "Sparkling water", "amount": 5.5 },
+          { "desc": "Service", "amount": 8.5 }
+        ],
+        "total": 62,
+        "taxId": "GB 377 9021 46",
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "Larch & Lantern", "confidence": 0.97 },
+        "amount": { "value": 62, "confidence": 0.98 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-10-06", "confidence": 0.96 },
+        "taxId": { "value": "GB 377 9021 46", "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 1, "confidence": 0.92 }
+      }
+    },
+    {
+      "id": "rcpt-daniel-near-cap",
+      "workerId": "w-daniel",
+      "label": "Dinner close to the cap",
+      "scenario": "£48.50 for one person, within 5% of the £50 meal cap. Goes to the client admin with a disclaimer instead of Pebl HR.",
+      "expectedOutcome": "admin_disclaimer",
+      "note": "Dinner before the early data-centre visit",
+      "receipt": {
+        "merchant": "The Copper Kettle",
+        "address": "Piccadilly, Manchester M1",
+        "date": "2026-10-06",
+        "time": "20:15",
+        "currency": "GBP",
+        "lines": [
+          { "desc": "Steak frites", "amount": 36 },
+          { "desc": "Soft drink", "amount": 4 },
+          { "desc": "Service", "amount": 8.5 }
+        ],
+        "total": 48.5,
+        "taxId": "GB 218 6650 92",
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "The Copper Kettle", "confidence": 0.97 },
+        "amount": { "value": 48.5, "confidence": 0.98 },
+        "currency": { "value": "GBP", "confidence": 0.99 },
+        "date": { "value": "2026-10-06", "confidence": 0.96 },
+        "taxId": { "value": "GB 218 6650 92", "confidence": 0.94 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 1, "confidence": 0.92 }
+      }
+    },
+    {
+      "id": "rcpt-priya-unusual",
+      "workerId": "w-priya",
+      "label": "Team lunch, unusual amount",
+      "scenario": "$94 for two, 3x Priya's usual meal spend but within every limit. Goes to the client admin with a disclaimer instead of Pebl HR.",
+      "expectedOutcome": "admin_disclaimer",
+      "note": "Lunch with the design intern after the portfolio review",
+      "receipt": {
+        "merchant": "Greenpoint Kitchen",
+        "address": "Franklin St, Brooklyn, NY 11222",
+        "date": "2026-10-07",
+        "time": "13:10",
+        "currency": "USD",
+        "lines": [
+          { "desc": "Lunch set x2", "amount": 68 },
+          { "desc": "Sales tax", "amount": 6.03 },
+          { "desc": "Tip", "amount": 19.97 }
+        ],
+        "total": 94,
+        "taxId": null,
+        "covers": 2
+      },
+      "read": {
+        "merchant": { "value": "Greenpoint Kitchen", "confidence": 0.97 },
+        "amount": { "value": 94, "confidence": 0.98 },
+        "currency": { "value": "USD", "confidence": 0.99 },
+        "date": { "value": "2026-10-07", "confidence": 0.96 },
+        "taxId": { "value": null, "confidence": 0.95 },
+        "category": { "value": "meals", "confidence": 0.95 },
+        "attendees": { "value": 2, "confidence": 0.92 }
+      }
+    },
+    {
+      "id": "rcpt-sophie-late-taxi",
+      "workerId": "w-sophie",
+      "label": "Taxi from six weeks ago",
+      "scenario": "Compliant, but submitted 45 days after the trip, past Lumen's 30-day window. Goes to the client admin with a disclaimer instead of Pebl HR.",
+      "expectedOutcome": "admin_disclaimer",
+      "note": "Taxi to the Desjardins onsite (found the receipt late)",
+      "receipt": {
+        "merchant": "Taxi Diamond Montréal",
+        "address": "Rue Sherbrooke O, Montréal, QC",
+        "date": "2026-08-25",
+        "time": "18:40",
+        "currency": "CAD",
+        "lines": [
+          { "desc": "Fare, office to client site", "amount": 36.5 },
+          { "desc": "TPS/TVQ", "amount": 5.5 }
+        ],
+        "total": 42,
+        "taxId": "GST 75231 8804 RT0001",
+        "covers": 1
+      },
+      "read": {
+        "merchant": { "value": "Taxi Diamond Montréal", "confidence": 0.96 },
+        "amount": { "value": 42, "confidence": 0.98 },
+        "currency": { "value": "CAD", "confidence": 0.99 },
+        "date": { "value": "2026-08-25", "confidence": 0.95 },
+        "taxId": { "value": "GST 75231 8804 RT0001", "confidence": 0.93 },
+        "category": { "value": "travel", "confidence": 0.96 },
+        "attendees": { "value": 1, "confidence": 0.95 }
+      }
+    }
+  ]
+}

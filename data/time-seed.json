@@ -1,0 +1,13 @@
+{
+  "_note": "Working-time state before the demo starts. overtimeEarlierThisMonth is overtime already worked this month before the current timesheet week. unplannedPerWeek is the worker's recent average of overtime that wasn't requested in advance; the AI forecast uses it to project month-end hours. No overtime requests or timesheets are in the system when the demo starts.",
+  "workers": {
+    "w-muhammad": { "hourlyRate": 42, "schedule": { "start": "09:00", "end": "17:30", "breakMin": 30 }, "overtimeEarlierThisMonth": 10, "unplannedPerWeek": 1.5 },
+    "w-daniel": { "hourlyRate": 36, "schedule": { "start": "09:00", "end": "17:30", "breakMin": 30 }, "overtimeEarlierThisMonth": 4, "unplannedPerWeek": 1 },
+    "w-priya": { "hourlyRate": 55, "schedule": { "start": "09:00", "end": "17:30", "breakMin": 30 }, "overtimeEarlierThisMonth": 0, "unplannedPerWeek": 0 },
+    "w-sophie": { "hourlyRate": 45, "schedule": { "start": "08:30", "end": "17:00", "breakMin": 30 }, "overtimeEarlierThisMonth": 0, "unplannedPerWeek": 0.5 },
+    "w-lukas": { "hourlyRate": 40, "schedule": { "start": "08:30", "end": "17:00", "breakMin": 30 }, "overtimeEarlierThisMonth": 6, "unplannedPerWeek": 1 },
+    "w-kenji": { "hourlyRate": 3500, "schedule": { "start": "09:00", "end": "18:00", "breakMin": 60 }, "overtimeEarlierThisMonth": 10, "unplannedPerWeek": 1.4 }
+  },
+  "overtimeRequests": [],
+  "timesheets": []
+}

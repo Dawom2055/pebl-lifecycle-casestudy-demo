@@ -1,0 +1,83 @@
+{
+  "_note": "Layer 1 for Time: statutory working-time rules per country, owned by Pebl compliance. Monthly caps for the UK and Germany are derived from their weekly limits for the demo and marked illustrative. Canada is out of scope for Time (provincial rules), so its timesheets go to HR.",
+  "countries": {
+    "UK": {
+      "covered": true,
+      "id": "UK-TM-WTR",
+      "version": "2026.1",
+      "effectiveFrom": "2026-01-01",
+      "standardDailyHours": 8,
+      "dailyMax": null,
+      "weeklyMax": 48,
+      "monthlyOvertimeCap": 34,
+      "minRestHours": 11,
+      "breakRule": { "afterHours": 6, "minutes": 20 },
+      "statutoryPremiumPct": 0,
+      "prerequisite": null,
+      "dailyLogging": false,
+      "description": "48-hour average working week, 11 hours' rest between working days, a 20-minute break after 6 hours. Overtime premium is contractual.",
+      "capNote": "monthly cap derived from the 48-hour weekly average",
+      "illustrative": true,
+      "source": "GOV.UK: Maximum weekly working hours"
+    },
+    "DE": {
+      "covered": true,
+      "id": "DE-TM-ARBZG",
+      "version": "2026.1",
+      "effectiveFrom": "2026-01-01",
+      "standardDailyHours": 8,
+      "dailyMax": 10,
+      "weeklyMax": 48,
+      "monthlyOvertimeCap": 40,
+      "minRestHours": 11,
+      "breakRule": { "afterHours": 6, "minutes": 30, "longAfterHours": 9, "longMinutes": 45 },
+      "statutoryPremiumPct": 0,
+      "prerequisite": null,
+      "dailyLogging": true,
+      "description": "8 hours a day, up to 10 if averaged out; 11 hours' rest; 30-minute break after 6 hours, 45 after 9. Extra hours are logged daily.",
+      "capNote": "monthly cap derived from the 10-hour day",
+      "illustrative": true,
+      "source": "Germany: maximum working hours under the ArbZG"
+    },
+    "US": {
+      "covered": true,
+      "id": "US-TM-FLSA",
+      "version": "2026.1",
+      "effectiveFrom": "2026-01-01",
+      "standardDailyHours": 8,
+      "dailyMax": null,
+      "weeklyMax": null,
+      "monthlyOvertimeCap": null,
+      "minRestHours": null,
+      "breakRule": null,
+      "statutoryPremiumPct": 50,
+      "prerequisite": null,
+      "dailyLogging": false,
+      "description": "Non-exempt employees are paid 1.5x for hours over 40 in a week. No federal cap on hours. Daily-overtime states such as California are excluded from launch.",
+      "capNote": "no federal cap",
+      "source": "US Department of Labor: Overtime pay"
+    },
+    "JP": {
+      "covered": true,
+      "id": "JP-TM-ART36",
+      "version": "2026.1",
+      "effectiveFrom": "2026-04-01",
+      "standardDailyHours": 8,
+      "dailyMax": null,
+      "weeklyMax": null,
+      "monthlyOvertimeCap": 45,
+      "minRestHours": null,
+      "breakRule": { "afterHours": 6, "minutes": 45, "longAfterHours": 8, "longMinutes": 60 },
+      "statutoryPremiumPct": 25,
+      "prerequisite": "Article 36 agreement",
+      "dailyLogging": false,
+      "description": "Overtime needs an Article 36 agreement; generally capped at 45 hours a month and 360 a year, paid at a 25% premium or more.",
+      "capNote": "general monthly limit",
+      "illustrative": true
+    },
+    "CA": {
+      "covered": false,
+      "coverageNote": "Canada sits out of Time for now: hours and overtime rules are set province by province."
+    }
+  }
+}

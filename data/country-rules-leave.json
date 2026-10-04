@@ -1,0 +1,196 @@
+{
+  "_note": "Layer 1 for Leave: statutory leave rules per country, owned by Pebl compliance. Values marked illustrative are placeholders for the demo, not legal advice. Canada is out of scope for Leave: most employees fall under provincial standards, so each province is its own rulebook and requests go to HR.",
+  "countries": {
+    "UK": {
+      "covered": true,
+      "leaveYearStart": "01-01",
+      "vacation": {
+        "id": "UK-LV-ANNUAL",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "minimumDays": 28,
+        "description": "5.6 weeks' paid holiday a year (28 days for a 5-day week). Bank holidays can count toward it.",
+        "source": "GOV.UK: Holiday entitlement"
+      },
+      "carryover": {
+        "id": "UK-LV-CARRY",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "expiresOn": "12-31",
+        "employerMustWarn": false,
+        "description": "Unused statutory leave lapses at the end of the leave year, apart from what the employer agrees to carry over.",
+        "illustrative": true
+      },
+      "sick": {
+        "id": "UK-LV-SICK",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "shortMaxDays": 7,
+        "documentAfterDays": 7,
+        "pay": "Company sick pay at full rate (Statutory Sick Pay is the floor)",
+        "description": "Up to 7 days can be self-certified; a fit note is needed after that.",
+        "illustrative": true
+      },
+      "paternity": {
+        "id": "UK-LV-PAT",
+        "version": "2026.1",
+        "effectiveFrom": "2026-04-06",
+        "maxDays": 10,
+        "pay": "Statutory paternity pay rate",
+        "description": "Up to 2 weeks' statutory paternity leave, paid at the statutory rate.",
+        "illustrative": true
+      },
+      "parental": {
+        "id": "UK-LV-PARENT",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "pay": "Unpaid",
+        "description": "Unpaid parental leave, up to 18 weeks per child.",
+        "illustrative": true
+      },
+      "publicHolidays": [
+        { "date": "2026-12-25", "name": "Christmas Day" },
+        { "date": "2026-12-28", "name": "Boxing Day (substitute day)" },
+        { "date": "2027-01-01", "name": "New Year's Day" }
+      ]
+    },
+    "US": {
+      "covered": true,
+      "leaveYearStart": "01-01",
+      "vacation": {
+        "id": "US-LV-ANNUAL",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "minimumDays": 0,
+        "description": "No federal paid-vacation mandate, so vacation is entirely client policy.",
+        "source": "US Department of Labor: Vacation leave"
+      },
+      "carryover": {
+        "id": "US-LV-CARRY",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "expiresOn": "12-31",
+        "employerMustWarn": false,
+        "description": "Carryover follows client policy (some states restrict forfeiture).",
+        "illustrative": true
+      },
+      "sick": {
+        "id": "US-LV-SICK",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "shortMaxDays": 5,
+        "documentAfterDays": 5,
+        "pay": "Paid under the company sick policy (state paid-sick-leave laws are the floor)",
+        "illustrative": true
+      },
+      "paternity": null,
+      "parental": {
+        "id": "US-LV-FMLA",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "pay": "Unpaid (job-protected where FMLA applies)",
+        "description": "Up to 12 weeks of unpaid, job-protected leave for eligible employees.",
+        "illustrative": true
+      },
+      "publicHolidays": [
+        { "date": "2026-11-26", "name": "Thanksgiving" },
+        { "date": "2026-11-27", "name": "Day after Thanksgiving (company holiday)" },
+        { "date": "2026-12-25", "name": "Christmas Day" },
+        { "date": "2027-01-01", "name": "New Year's Day" }
+      ]
+    },
+    "DE": {
+      "covered": true,
+      "leaveYearStart": "01-01",
+      "vacation": {
+        "id": "DE-LV-BURLG",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "minimumDays": 20,
+        "description": "At least 20 working days a year for a 5-day week (BUrlG).",
+        "source": "Germany: minimum vacation under the BUrlG"
+      },
+      "carryover": {
+        "id": "DE-LV-CARRY",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "expiresOn": "03-31",
+        "employerMustWarn": true,
+        "description": "Untaken leave carries to 31 March, then lapses only if the employer warned the employee in time.",
+        "illustrative": true
+      },
+      "sick": {
+        "id": "DE-LV-SICK",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "shortMaxDays": 3,
+        "documentAfterDays": 3,
+        "pay": "Full pay for up to 6 weeks (continued pay)",
+        "description": "A doctor's certificate is needed from the fourth day.",
+        "illustrative": true
+      },
+      "paternity": null,
+      "parental": {
+        "id": "DE-LV-ELTERNZEIT",
+        "version": "2026.1",
+        "effectiveFrom": "2026-01-01",
+        "pay": "Unpaid by the employer (state parental allowance applies)",
+        "description": "Parental leave (Elternzeit), up to 3 years per child.",
+        "illustrative": true
+      },
+      "publicHolidays": [
+        { "date": "2026-10-03", "name": "German Unity Day" },
+        { "date": "2026-12-25", "name": "Christmas Day" },
+        { "date": "2026-12-26", "name": "St Stephen's Day" },
+        { "date": "2027-01-01", "name": "New Year's Day" }
+      ]
+    },
+    "JP": {
+      "covered": true,
+      "leaveYearStart": "04-01",
+      "vacation": {
+        "id": "JP-LV-ANNUAL",
+        "version": "2026.1",
+        "effectiveFrom": "2026-04-01",
+        "minimumDays": 10,
+        "description": "At least 10 days after 6 months' service, rising with tenure; employers must ensure 5 days are taken each year.",
+        "illustrative": true
+      },
+      "carryover": {
+        "id": "JP-LV-CARRY",
+        "version": "2026.1",
+        "effectiveFrom": "2026-04-01",
+        "expiresOn": "03-31",
+        "employerMustWarn": false,
+        "description": "Unused days carry over for one year.",
+        "illustrative": true
+      },
+      "sick": {
+        "id": "JP-LV-SICK",
+        "version": "2026.1",
+        "effectiveFrom": "2026-04-01",
+        "shortMaxDays": 3,
+        "documentAfterDays": 3,
+        "pay": "Paid under the company sick policy",
+        "illustrative": true
+      },
+      "paternity": null,
+      "parental": null,
+      "publicHolidays": [
+        { "date": "2026-10-12", "name": "Sports Day" },
+        { "date": "2026-11-03", "name": "Culture Day" },
+        { "date": "2026-11-23", "name": "Labour Thanksgiving Day" },
+        { "date": "2027-01-01", "name": "New Year's Day" }
+      ]
+    },
+    "CA": {
+      "covered": false,
+      "coverageNote": "Canada sits out of Leave for now: most employees fall under provincial employment standards, so each province is its own rulebook.",
+      "publicHolidays": [
+        { "date": "2026-10-12", "name": "Thanksgiving" },
+        { "date": "2026-12-25", "name": "Christmas Day" },
+        { "date": "2027-01-01", "name": "New Year's Day" }
+      ]
+    }
+  }
+}

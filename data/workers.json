@@ -1,0 +1,79 @@
+{
+  "client": {
+    "id": "lumen",
+    "name": "Lumen Robotics",
+    "admin": { "name": "Alex Morgan", "title": "Head of People, Lumen Robotics" }
+  },
+  "hrSpecialist": { "name": "Sarah Chen", "title": "Pebl local HR specialist" },
+  "workers": [
+    {
+      "id": "w-muhammad",
+      "name": "Muhammad Dawood",
+      "title": "Senior Software Engineer",
+      "country": "UK",
+      "currency": "GBP",
+      "team": "Platform",
+      "classification": "salaried_overtime_eligible",
+      "usualMealSpend": 45,
+      "startDate": "2025-03-03"
+    },
+    {
+      "id": "w-daniel",
+      "name": "Daniel Okafor",
+      "title": "Software Engineer",
+      "country": "UK",
+      "currency": "GBP",
+      "team": "Platform",
+      "classification": "salaried_overtime_eligible",
+      "usualMealSpend": 40,
+      "startDate": "2025-06-16"
+    },
+    {
+      "id": "w-priya",
+      "name": "Priya Shah",
+      "title": "Product Designer",
+      "country": "US",
+      "region": "NY",
+      "currency": "USD",
+      "team": "Design",
+      "classification": "salaried_exempt",
+      "usualMealSpend": 30,
+      "startDate": "2024-11-04"
+    },
+    {
+      "id": "w-sophie",
+      "name": "Sophie Tremblay",
+      "title": "Customer Success Lead",
+      "country": "CA",
+      "region": "QC",
+      "currency": "CAD",
+      "team": "Customer Success",
+      "classification": "salaried_overtime_eligible",
+      "usualMealSpend": 55,
+      "startDate": "2025-01-13"
+    },
+    {
+      "id": "w-lukas",
+      "name": "Lukas Weber",
+      "title": "Robotics Engineer",
+      "country": "DE",
+      "region": "BE",
+      "currency": "EUR",
+      "team": "Hardware",
+      "classification": "salaried_overtime_eligible",
+      "usualMealSpend": 38,
+      "startDate": "2024-09-02"
+    },
+    {
+      "id": "w-kenji",
+      "name": "Kenji Sato",
+      "title": "Field Engineer",
+      "country": "JP",
+      "currency": "JPY",
+      "team": "Hardware",
+      "classification": "salaried_overtime_eligible",
+      "usualMealSpend": 4500,
+      "startDate": "2025-04-01"
+    }
+  ]
+}

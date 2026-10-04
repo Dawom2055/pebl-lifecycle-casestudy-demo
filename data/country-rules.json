@@ -1,0 +1,192 @@
+{
+  "_note": "Layer 1: country rules, owned by Pebl compliance. Values marked illustrative are placeholders for the demo, not legal advice. Every rule carries a version and an effective date so a decision can record exactly which rule it used.",
+  "fxToUSD": {
+    "_note": "Illustrative fixed rates. Production would use the rate on the transaction date.",
+    "USD": 1,
+    "GBP": 1.27,
+    "EUR": 1.08,
+    "CAD": 0.73,
+    "JPY": 0.0067
+  },
+  "countries": {
+    "UK": {
+      "name": "United Kingdom",
+      "currency": "GBP",
+      "expenses": {
+        "taxId": {
+          "id": "UK-EXP-VAT",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "label": "VAT number",
+          "requiredOver": 0,
+          "description": "Receipts must show the supplier's VAT registration number.",
+          "illustrative": true
+        },
+        "receipt": {
+          "id": "UK-EXP-RCPT",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "requiredOver": 0,
+          "description": "A receipt is required for every expense except mileage.",
+          "illustrative": true
+        },
+        "mealTaxFreePerPerson": {
+          "id": "UK-EXP-MEAL",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "amount": 60,
+          "description": "Amount per person above this is reimbursed but reported to payroll as taxable.",
+          "illustrative": true
+        },
+        "mileage": [
+          {
+            "id": "UK-EXP-MILE",
+            "version": "2025.1",
+            "effectiveFrom": "2025-04-06",
+            "effectiveTo": "2026-04-05",
+            "ratePerUnit": 0.45,
+            "unit": "mile",
+            "description": "Tax-free mileage allowance, first 10,000 business miles."
+          },
+          {
+            "id": "UK-EXP-MILE",
+            "version": "2026.1",
+            "effectiveFrom": "2026-04-06",
+            "ratePerUnit": 0.55,
+            "unit": "mile",
+            "description": "Tax-free mileage allowance, first 10,000 business miles (rate raised from 45p, per the case study brief citing GOV.UK)."
+          }
+        ]
+      }
+    },
+    "US": {
+      "name": "United States",
+      "currency": "USD",
+      "expenses": {
+        "taxId": null,
+        "receipt": {
+          "id": "US-EXP-RCPT",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "requiredOver": 75,
+          "description": "Receipts are required for expenses of $75 or more.",
+          "illustrative": true
+        },
+        "mealTaxFreePerPerson": null,
+        "reimbursementFloor": {
+          "id": "US-CA-2802",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "regions": ["CA"],
+          "description": "California Labor Code 2802: employers must reimburse necessary business expenses. A client policy can't refuse them."
+        },
+        "mileage": [
+          {
+            "id": "US-EXP-MILE",
+            "version": "2026.1",
+            "effectiveFrom": "2026-01-01",
+            "ratePerUnit": 0.7,
+            "unit": "mile",
+            "description": "Standard business mileage rate.",
+            "illustrative": true
+          }
+        ]
+      }
+    },
+    "CA": {
+      "name": "Canada",
+      "currency": "CAD",
+      "expenses": {
+        "taxId": {
+          "id": "CA-EXP-GST",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "label": "GST/HST number",
+          "requiredOver": 30,
+          "description": "Receipts of C$30 or more must show the supplier's GST/HST registration number.",
+          "illustrative": true
+        },
+        "receipt": {
+          "id": "CA-EXP-RCPT",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "requiredOver": 0,
+          "description": "A receipt is required for every expense except mileage.",
+          "illustrative": true
+        },
+        "mealTaxFreePerPerson": null,
+        "mileage": [
+          {
+            "id": "CA-EXP-MILE",
+            "version": "2026.1",
+            "effectiveFrom": "2026-01-01",
+            "ratePerUnit": 0.72,
+            "unit": "km",
+            "description": "Reasonable per-km allowance, first 5,000 km.",
+            "illustrative": true
+          }
+        ]
+      }
+    },
+    "DE": {
+      "name": "Germany",
+      "currency": "EUR",
+      "expenses": {
+        "taxId": {
+          "id": "DE-EXP-UST",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "label": "VAT (USt) details",
+          "requiredOver": 250,
+          "description": "Invoices over €250 must show the supplier's tax number.",
+          "illustrative": true
+        },
+        "receipt": {
+          "id": "DE-EXP-RCPT",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "requiredOver": 0,
+          "description": "A receipt is required for every expense except mileage.",
+          "illustrative": true
+        },
+        "mealTaxFreePerPerson": null,
+        "mileage": [
+          {
+            "id": "DE-EXP-MILE",
+            "version": "2026.1",
+            "effectiveFrom": "2026-01-01",
+            "ratePerUnit": 0.3,
+            "unit": "km",
+            "description": "Per-km allowance for private car use.",
+            "illustrative": true
+          }
+        ]
+      }
+    },
+    "JP": {
+      "name": "Japan",
+      "currency": "JPY",
+      "expenses": {
+        "taxId": {
+          "id": "JP-EXP-INV",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "label": "Qualified invoice number",
+          "requiredOver": 30000,
+          "description": "Receipts of ¥30,000 or more must show the supplier's registered invoice number.",
+          "illustrative": true
+        },
+        "receipt": {
+          "id": "JP-EXP-RCPT",
+          "version": "2026.1",
+          "effectiveFrom": "2026-01-01",
+          "requiredOver": 0,
+          "description": "A receipt is required for every expense except mileage.",
+          "illustrative": true
+        },
+        "mealTaxFreePerPerson": null,
+        "mileage": []
+      }
+    }
+  }
+}

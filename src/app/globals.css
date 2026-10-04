@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/* Color = who acts, matching the Lifecycle Compliance Flows diagrams. */
+@theme {
+  --color-bg: #f3f6f8;
+  --color-surface: #ffffff;
+  --color-sunken: #eef2f5;
+  --color-ink: #17202a;
+  --color-muted: #5a6675;
+  --color-faint: #8a95a3;
+  --color-line: #d3dae2;
+  --color-line-soft: #e4e9ee;
+
+  --color-worker: #0f766e;
+  --color-worker-bg: #e2f3f0;
+  --color-ai: #6a4cc0;
+  --color-ai-bg: #eeeafb;
+  --color-rules: #2456a6;
+  --color-rules-bg: #e5edf9;
+  --color-admin: #1d7a3c;
+  --color-admin-bg: #e3f3e8;
+  --color-hr: #9c5600;
+  --color-hr-bg: #fbeedb;
+  --color-danger: #b42318;
+  --color-danger-bg: #fdecea;
+
+  --font-display: var(--font-schibsted), "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-public), "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, Menlo, Consolas, monospace;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Receipt paper */
+.receipt-paper {
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    repeating-linear-gradient(90deg, transparent 0 8px, var(--color-line) 8px 9px) border-box;
+  font-family: var(--font-mono);
+  box-shadow: 0 1px 2px rgb(23 32 42 / 0.06), 0 8px 24px rgb(23 32 42 / 0.08);
+}
+
+.receipt-cropped {
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 92%);
+}
+
+@keyframes scan {
+  0% {
+    top: 0%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-ai);
+  box-shadow: 0 0 16px 4px rgb(106 76 192 / 0.35);
+  animation: scan 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.toast-in {
+  animation: toast-in 0.18s ease-out;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgb(106 76 192 / 0.12), transparent) no-repeat;
+  background-size: 200px 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-rules);
+  outline-offset: 2px;
+}
