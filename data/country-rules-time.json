@@ -50,6 +50,8 @@
       "monthlyOvertimeCap": null,
       "minRestHours": null,
       "breakRule": null,
+      "paidBreakUnderMinutes": 30,
+      "paidBreakNote": "Short breaks (about 5 to 20 minutes) are paid working time under the FLSA. Only a bona fide meal break of 30 minutes or more, fully off duty, can be unpaid.",
       "statutoryPremiumPct": 50,
       "prerequisite": null,
       "dailyLogging": false,

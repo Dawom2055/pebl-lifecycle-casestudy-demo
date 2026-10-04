@@ -334,7 +334,8 @@ export function evaluateTimesheet(
   const std = law.covered ? law.standardDailyHours : 8;
   const cur = worker.currency;
   const checks: RuleCheck[] = [];
-  const worked = data.days.map((d) => ({ ...d, hours: d.off ? 0 : workedHours(d.start, d.end, d.breakMin) }));
+  const paidUnder = law.covered ? law.paidBreakUnderMinutes : undefined;
+  const worked = data.days.map((d) => ({ ...d, hours: d.off ? 0 : workedHours(d.start, d.end, d.breakMin, paidUnder) }));
   const total = sum(worked.map((d) => d.hours));
   const otByDay = worked.map((d) => ({ date: d.date, ot: Math.max(0, d.hours - std) }));
   const overtime = round1(sum(otByDay.map((d) => d.ot)));
@@ -439,6 +440,22 @@ export function evaluateTimesheet(
       layer: "country",
       status: restBreaches.length ? "fail" : "pass",
       detail: restBreaches.length ? `${restBreaches.join("; ")}. At least ${law.minRestHours} hours required.` : `At least ${law.minRestHours} hours between every shift.`,
+      ruleId: law.id,
+      ruleVersion: law.version,
+    });
+  }
+
+  // Short breaks counted as paid time (US): say so, so the pay calculation is traceable.
+  const paidBreaks = paidUnder ? worked.filter((d) => !d.off && d.breakMin > 0 && d.breakMin < paidUnder) : [];
+  if (paidUnder) {
+    checks.push({
+      id: "paid_breaks",
+      label: "Paid breaks",
+      layer: "country",
+      status: "info",
+      detail: paidBreaks.length
+        ? `${paidBreaks.map((d) => `${dayName(d.date)} ${d.breakMin} min`).join(", ")} counted as paid working time. ${law.paidBreakNote ?? ""}`.trim()
+        : `Breaks of ${paidUnder} minutes or more are unpaid meal breaks; shorter ones would be paid.`,
       ruleId: law.id,
       ruleVersion: law.version,
     });

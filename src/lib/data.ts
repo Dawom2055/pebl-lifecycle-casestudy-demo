@@ -213,6 +213,9 @@ export interface CountryTimeRules {
   monthlyOvertimeCap: number | null;
   minRestHours: number | null;
   breakRule: { afterHours: number; minutes: number; longAfterHours?: number; longMinutes?: number } | null;
+  /** Breaks shorter than this are paid working time, so they aren't deducted from hours worked. */
+  paidBreakUnderMinutes?: number;
+  paidBreakNote?: string;
   statutoryPremiumPct: number;
   prerequisite: string | null;
   dailyLogging: boolean;

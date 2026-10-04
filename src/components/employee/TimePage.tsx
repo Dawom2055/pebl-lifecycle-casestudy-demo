@@ -181,7 +181,7 @@ export function TimePage({ onOpen }: { onOpen(id: string): void }) {
                 </thead>
                 <tbody>
                   {days.map((d, i) => {
-                    const h = d.off ? 0 : workedHours(d.start, d.end, d.breakMin);
+                    const h = d.off ? 0 : workedHours(d.start, d.end, d.breakMin, law.covered ? law.paidBreakUnderMinutes : undefined);
                     const changed = JSON.stringify(d) !== JSON.stringify(base[i]);
                     return (
                       <tr key={d.date} className={cx("border-t border-line-soft", changed && "bg-worker-bg/50")}>

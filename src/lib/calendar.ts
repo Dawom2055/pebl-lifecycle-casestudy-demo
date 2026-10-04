@@ -68,10 +68,12 @@ export function hhmm(totalMinutes: number) {
 }
 
 /** Hours worked in a day from start, end and unpaid break. Ends past midnight roll over. */
-export function workedHours(start: string, end: string, breakMin: number) {
+/** Hours worked in a shift. A break shorter than `paidBreakUnder` minutes is paid time, so it isn't deducted. */
+export function workedHours(start: string, end: string, breakMin: number, paidBreakUnder?: number) {
   let span = minutes(end) - minutes(start);
   if (span <= 0) span += 1440;
-  return Math.max(0, (span - breakMin) / 60);
+  const unpaid = paidBreakUnder && breakMin < paidBreakUnder ? 0 : breakMin;
+  return Math.max(0, (span - unpaid) / 60);
 }
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

@@ -268,6 +268,16 @@ function layersFor(task: Task, c: CountryCode, policy: ClientPolicy): { covered:
         applied: "A breach → Pebl HR incident",
       },
       {
+        rule: "Breaks",
+        law: law.breakRule
+          ? `${law.breakRule.minutes} min after ${law.breakRule.afterHours} hrs${law.breakRule.longAfterHours ? `, ${law.breakRule.longMinutes} after ${law.breakRule.longAfterHours}` : ""}, unpaid`
+          : law.paidBreakUnderMinutes
+            ? `None required. Breaks under ${law.paidBreakUnderMinutes} min are paid`
+            : "None required",
+        company: "–",
+        applied: law.breakRule ? "A short break → Pebl HR incident" : law.paidBreakUnderMinutes ? `Breaks under ${law.paidBreakUnderMinutes} min count as hours worked` : "Not checked",
+      },
+      {
         rule: "Approval",
         law: "–",
         company: p.mode === "pre_approval" ? "Overtime is approved in advance" : "Automatic within the limit",

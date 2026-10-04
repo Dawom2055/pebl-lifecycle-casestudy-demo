@@ -1,7 +1,7 @@
 "use client";
 
 import { dayName, rangeLabel, workedHours } from "@/lib/calendar";
-import { getSampleReceipt } from "@/lib/data";
+import { getSampleReceipt, getWorker, timeRules } from "@/lib/data";
 import { money } from "@/lib/format";
 import type { AnyRequest, CheckStatus, Explanation, RuleCheck, TimesheetRequest } from "@/lib/types";
 import { ActorChip, cx, Eyebrow, SparkIcon } from "./ui";
@@ -300,7 +300,8 @@ export function TimesheetTable({ req }: { req: TimesheetRequest }) {
         </thead>
         <tbody>
           {req.data.days.map((d) => {
-            const h = d.off ? 0 : workedHours(d.start, d.end, d.breakMin);
+            const law = timeRules[getWorker(req.workerId).country];
+            const h = d.off ? 0 : workedHours(d.start, d.end, d.breakMin, law.covered ? law.paidBreakUnderMinutes : undefined);
             return (
               <tr key={d.date} className="border-t border-line-soft">
                 <td className="py-1.5 pr-3 font-semibold">
