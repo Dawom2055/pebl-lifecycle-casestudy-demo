@@ -9,6 +9,7 @@ import { leaveLabel } from "@/lib/engine/leave";
 import { hrLinksFor } from "@/lib/hr-links";
 import { useDemo } from "@/lib/store";
 import type { AnyRequest, LeaveRequest, OvertimeRequest, Role, TimesheetRequest } from "@/lib/types";
+import { RequestChat } from "./RequestChat";
 import { AdvisoryNote, ChecksList, ExplanationCard, OvertimeMeter, PipelineTrace, ReceiptView, SignalsList, TimesheetTable } from "./request-parts";
 import { Button, cx, Eyebrow, Modal, Required, StatusBadge } from "./ui";
 
@@ -110,6 +111,8 @@ export function RequestDetail({ req, role, onClose, onFix }: { req: AnyRequest |
           </ol>
           <p className="mt-2 text-xs text-faint">Every decision stores its inputs, the rule versions used, the routing signals and who acted.</p>
         </section>
+
+        {role === "hr" && <RequestChat key={req.id} req={req} />}
       </div>
     </Modal>
   );

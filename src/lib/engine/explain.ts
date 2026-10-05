@@ -96,14 +96,25 @@ function expenseTemplate(req: ExpenseRequest, worker: Worker, audience: Audience
   const flags = routing.signals.filter((s) => s.id !== "not_unlocked");
   const passing = evaluation.checks.filter((c) => c.status === "pass").length;
   const otherOk = evaluation.result === "pass" ? " All other checks pass." : ` ${passing} of ${evaluation.checks.length} checks pass.`;
-  if (flags.length === 0 && routing.shadowWould) return shadowText(req, wouldLabel(req));
-  const anomaly = flags.find((s) => s.id === "anomaly");
-  const dup = flags.find((s) => s.id === "duplicate");
-  const pre = flags.find((s) => s.label === "No pre-approval");
-  if (dup) return t(`Flagged: possible duplicate. ${dup.detail}`, { suggestedAction: "Check with both workers whether this was split or claimed twice." });
-  if (pre) return t(`Flagged: ${amount} ${what} has no pre-approval on file.${otherOk}`, { suggestedAction: "Confirm the trip was approved, then clear or ask for the approval." });
-  if (anomaly) return t(`Flagged: amount is ${anomaly.detail.split(" ")[0]} this worker's usual meal expense.${otherOk}`, { suggestedAction: "Confirm business purpose." });
-  return t(`Flagged: ${flags.map((f) => f.label.toLowerCase()).join("; ")}.${otherOk}`, { suggestedAction: "Review the flagged checks and decide." });
+  // Disclaimers (meal cap, unusual amount, late, no pre-approval) ride along but aren't why it's here.
+  const advisory = new Set((routing.advisories ?? []).map((x) => x.label));
+  const core = flags.filter((f) => !advisory.has(f.label));
+  const notes = flags.filter((f) => advisory.has(f.label));
+  const also = notes.length ? ` Also noted for the client admin: ${notes.map((n) => n.label.toLowerCase()).join(", ")}.` : "";
+  if (core.length === 0 && routing.shadowWould) {
+    const shadow = shadowText(req, wouldLabel(req));
+    return { ...shadow, text: shadow.text + also };
+  }
+  const dup = core.find((s) => s.id === "duplicate");
+  const pre = notes.find((s) => s.label === "No pre-approval");
+  const anomaly = notes.find((s) => s.label === "Unusual amount");
+  if (dup) return t(`Flagged: possible duplicate. ${dup.detail}${also}`, { suggestedAction: "Check with both workers whether this was split or claimed twice." });
+  const action = pre
+    ? "Confirm the expense was pre-approved, then send it to the admin or ask for the approval."
+    : anomaly
+      ? "Confirm the business purpose, then send it to the admin."
+      : "Review the flagged checks and decide.";
+  return t(`Flagged: ${(core.length ? core : flags).map((f) => f.label.toLowerCase()).join("; ")}.${otherOk}${core.length ? also : ""}`, { suggestedAction: action });
 }
 
 /** "over the meal cap and 3x your usual meal spend" */

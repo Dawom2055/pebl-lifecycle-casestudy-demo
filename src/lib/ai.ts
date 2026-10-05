@@ -50,6 +50,37 @@ export async function claudeJson<T>(opts: {
   return JSON.parse(text.text) as T;
 }
 
+/**
+ * One conversational turn: returns Claude's reply as plain text. Same refusal fallbacks as
+ * claudeJson, so a safety-classifier decline is retried on Anthropic's recommended fallback model.
+ */
+export async function claudeChat(opts: {
+  system: string;
+  messages: Anthropic.Beta.BetaMessageParam[];
+  effort?: "low" | "medium" | "high";
+  maxTokens?: number;
+}): Promise<string> {
+  const response = await getClient().beta.messages.create({
+    model: MODEL,
+    max_tokens: opts.maxTokens ?? 4000,
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    system: opts.system,
+    messages: opts.messages,
+    output_config: { effort: opts.effort ?? "medium" },
+  });
+
+  if (response.stop_reason === "refusal") throw new AiError("Claude declined to answer that.", 422);
+  if (response.stop_reason === "max_tokens") throw new AiError("Claude's reply was cut off.", 502);
+  const text = response.content
+    .filter((b) => b.type === "text")
+    .map((b) => (b.type === "text" ? b.text : ""))
+    .join("\n")
+    .trim();
+  if (!text) throw new AiError("Claude returned no text.", 502);
+  return text;
+}
+
 export class AiError extends Error {
   constructor(
     message: string,
