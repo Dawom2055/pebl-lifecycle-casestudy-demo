@@ -180,7 +180,7 @@ export interface CountryLeaveRules {
   leaveYearStart?: string;
   vacation?: LeaveRule & { minimumDays: number };
   carryover?: LeaveRule & { expiresOn: string; employerMustWarn: boolean };
-  sick?: LeaveRule & { shortMaxDays: number; documentAfterDays: number; pay: string };
+  sick?: LeaveRule & { shortMaxDays: number; documentAfterDays: number; pay: string; /** Paid sick days the law guarantees. */ minPaidDays?: number };
   paternity?: (LeaveRule & { maxDays: number; pay: string }) | null;
   parental?: (LeaveRule & { pay: string }) | null;
   publicHolidays: { date: string; name: string }[];
@@ -213,6 +213,10 @@ export interface CountryTimeRules {
   monthlyOvertimeCap: number | null;
   minRestHours: number | null;
   breakRule: { afterHours: number; minutes: number; longAfterHours?: number; longMinutes?: number } | null;
+  /** The most a regular schedule may be, before anything counts as overtime or breaks the law. */
+  scheduleMaxDailyHours?: number | null;
+  scheduleMaxWeeklyHours?: number | null;
+  scheduleNote?: string;
   /** Breaks shorter than this are paid working time, so they aren't deducted from hours worked. */
   paidBreakUnderMinutes?: number;
   paidBreakNote?: string;

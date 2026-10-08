@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { rangeLabel } from "@/lib/calendar";
 import { countryRules, leaveRules, timeRules } from "@/lib/data";
+import { guardrails, scheduledDayHours, type Guardrail } from "@/lib/engine/guardrails";
 import { money } from "@/lib/format";
 import { useDemo } from "@/lib/store";
-import type { CountryCode, Currency, OvertimeCountryPolicy } from "@/lib/types";
-import { Button, Card, cx, Eyebrow } from "../ui";
+import type { ClientPolicy, CountryCode, Currency, OvertimeCountryPolicy, WorkingHoursPolicy } from "@/lib/types";
+import { Button, Card, cx, Eyebrow, SparkIcon } from "../ui";
 
 type Warning = { tone: "block" | "conflict" | "info"; text: string };
 
@@ -27,6 +28,64 @@ function Warnings({ items }: { items: Warning[] }) {
     </ul>
   );
 }
+
+/**
+ * Prevention: the draft policy checked against each country's law as it's edited. A setting that
+ * breaks the law blocks saving, with the legal value one click away.
+ */
+function PolicyCheck({ rows, onFix }: { rows: Guardrail[]; onFix(g: Guardrail): void }) {
+  const blocks = rows.filter((r) => r.status === "block");
+  const infos = rows.filter((r) => r.status === "info");
+  const checked = rows.filter((r) => r.status !== "locked");
+  const passing = checked.filter((r) => r.status === "ok").length;
+  const countries = [...new Set(rows.filter((r) => r.status !== "info").map((r) => r.country))];
+  return (
+    <section className={cx("rounded-xl border-2 p-4", blocks.length ? "border-danger/40 bg-danger-bg" : "border-admin/40 bg-admin-bg")}>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <SparkIcon className="text-ai" />
+        <h3 className="font-display font-bold">Pebl AI policy check</h3>
+        <span className={cx("text-sm font-semibold", blocks.length ? "text-danger" : "text-admin")}>
+          {blocks.length ? `${blocks.length} setting${blocks.length === 1 ? "" : "s"} break local law` : `${passing} of ${checked.length} settings meet local law`}
+        </span>
+      </div>
+      <p className="mt-0.5 text-xs text-muted">Checked live against verified {countries.join(", ")} rules. You can be stricter than the law, never looser.</p>
+      {blocks.length > 0 && (
+        <ul className="mt-3 grid gap-2">
+          {blocks.map((g) => (
+            <li key={g.country + g.setting} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface px-3 py-2 text-sm">
+              <span className="min-w-0">
+                <b>
+                  {g.country} · {g.setting}:
+                </b>{" "}
+                {g.message} {g.rule && <span className="font-mono text-[11px] text-faint">{g.rule}</span>}
+              </span>
+              {g.fix && (
+                <Button size="sm" variant="primary" onClick={() => onFix(g)}>
+                  {g.fix.label}
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {infos.length > 0 && (
+        <ul className="mt-2 grid gap-1">
+          {infos.map((g) => (
+            <li key={g.country + g.setting} className="text-xs text-muted">
+              <b>
+                {g.country} · {g.setting}:
+              </b>{" "}
+              {g.message}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+/** Red outline on an input whose setting breaks the law. */
+const blocked = (rows: Guardrail[], c: CountryCode, setting: string) => rows.some((r) => r.country === c && r.setting === setting && r.status === "block");
 
 function SaveButton({ blocked, onClick }: { blocked: boolean; onClick(): void }) {
   const { policy } = useDemo();
@@ -165,6 +224,7 @@ export function LeavePolicyTab() {
   const demo = useDemo();
   const p = demo.policy.leave;
   const [vacation, setVacation] = useState(p.vacationDays);
+  const [sick, setSick] = useState(p.sickPaidDays);
   const [notice, setNotice] = useState(String(p.noticeDays));
   const [maxRun, setMaxRun] = useState(String(p.maxConsecutiveDays));
   const [carry, setCarry] = useState(String(p.carryoverMaxDays));
@@ -173,23 +233,18 @@ export function LeavePolicyTab() {
   const [autoVac, setAutoVac] = useState(p.autoApproveVacationUpToDays);
   const [newBlackout, setNewBlackout] = useState({ start: "", end: "", label: "" });
 
-  const warnings: Warning[] = [];
-  for (const c of countries) {
-    const rule = leaveRules[c];
-    const min = rule.vacation?.minimumDays ?? 0;
-    // UK bank holidays can count toward the 5.6 weeks; the client grants them on top of PTO.
-    const holidays = c === "UK" ? 8 : 0;
-    if (rule.covered && vacation[c] + holidays < min) {
-      warnings.push({ tone: "block", text: `${c}: ${vacation[c]} days${holidays ? ` plus ${holidays} bank holidays` : ""} is below the legal minimum of ${min}. ${rule.vacation?.description}` });
-    }
-  }
-  if (Number(carry) > 0 && countries.some((c) => leaveRules[c].carryover?.expiresOn === "03-31")) {
-    warnings.push({ tone: "info", text: "Germany and Japan carry leave to a later deadline by law, so the carryover cap applies to UK and US workers only." });
-  }
+  const draft: ClientPolicy = { ...demo.policy, leave: { ...p, vacationDays: vacation, sickPaidDays: sick, carryoverMaxDays: Math.max(0, Number(carry) || 0) } };
+  const rows = guardrails(draft).filter((g) => g.area === "leave");
+  const fix = (g: Guardrail) => {
+    const next = g.fix!.apply(draft);
+    setVacation(next.leave.vacationDays);
+    setSick(next.leave.sickPaidDays);
+  };
 
   const save = () =>
     demo.updateLeavePolicy({
       vacationDays: vacation,
+      sickPaidDays: sick,
       noticeDays: Math.max(0, Number(notice) || 0),
       maxConsecutiveDays: Math.max(1, Number(maxRun) || 15),
       carryoverMaxDays: Math.max(0, Number(carry) || 0),
@@ -208,7 +263,20 @@ export function LeavePolicyTab() {
             {countries.map((c) => (
               <label key={c} className="grid gap-1 text-xs font-semibold text-muted">
                 {c} <span className="font-normal text-faint">law: {leaveRules[c].covered ? `${leaveRules[c].vacation?.minimumDays ?? 0}${c === "UK" ? " incl. BH" : ""}` : "provincial"}</span>
-                <input inputMode="numeric" value={vacation[c]} onChange={(e) => setVacation({ ...vacation, [c]: Number(e.target.value) || 0 })} className="w-full min-w-0 rounded-lg border border-line px-2.5 py-1.5 text-sm text-ink tabular" />
+                <input inputMode="numeric" value={vacation[c]} onChange={(e) => setVacation({ ...vacation, [c]: Number(e.target.value) || 0 })} className={cx("w-full min-w-0 rounded-lg border border-line px-2.5 py-1.5 text-sm text-ink tabular", blocked(rows, c, "Paid vacation") && "border-danger text-danger")} />
+              </label>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="font-bold">Paid sick days</h2>
+          <p className="text-sm text-muted">Per year, by country. Can&apos;t go below what the law guarantees.</p>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            {countries.map((c) => (
+              <label key={c} className="grid gap-1 text-xs font-semibold text-muted">
+                {c} <span className="font-normal text-faint">law: {leaveRules[c].covered ? (leaveRules[c].sick?.minPaidDays ? `${leaveRules[c].sick?.minPaidDays} min` : "company") : "provincial"}</span>
+                <input inputMode="numeric" value={sick[c]} onChange={(e) => setSick({ ...sick, [c]: Number(e.target.value) || 0 })} className={cx("w-full min-w-0 rounded-lg border border-line px-2.5 py-1.5 text-sm text-ink tabular", blocked(rows, c, "Paid sick days") && "border-danger text-danger")} />
               </label>
             ))}
           </div>
@@ -302,18 +370,21 @@ export function LeavePolicyTab() {
           </table>
         </section>
 
-        <Warnings items={warnings} />
-        <SaveButton blocked={warnings.some((w) => w.tone === "block")} onClick={save} />
+        <PolicyCheck rows={rows} onFix={fix} />
+        <SaveButton blocked={rows.some((r) => r.status === "block")} onClick={save} />
       </Card>
       <div className="grid content-start gap-4">
         <Card className="p-4">
-          <Eyebrow className="mb-2">Statutory minimums (layer 1)</Eyebrow>
+          <Eyebrow className="mb-2">Set by law · locked</Eyebrow>
+          <p className="mb-2 text-xs text-muted">Workers always get these. You can add to them, never remove them.</p>
           <ul className="grid gap-2 text-sm">
-            {countries.map((c) => (
-              <li key={c}>
-                <b>{c}</b> <span className="text-muted">{leaveRules[c].covered ? leaveRules[c].vacation?.description : leaveRules[c].coverageNote}</span>
-              </li>
-            ))}
+            {rows
+              .filter((r) => r.status === "locked")
+              .map((r) => (
+                <li key={r.country + r.setting}>
+                  <b>{r.country}</b> <span className="text-muted">{r.setting === "Carryover" ? r.message : r.law}</span>
+                </li>
+              ))}
           </ul>
         </Card>
         <LayersCard />
@@ -331,20 +402,8 @@ export function OvertimePolicyTab() {
   const [draft, setDraft] = useState(demo.policy.overtime);
   const set = (c: CountryCode, patch: Partial<OvertimeCountryPolicy>) => setDraft({ ...draft, [c]: { ...draft[c], ...patch } });
 
-  const warnings: Warning[] = [];
-  for (const c of countries) {
-    const law = timeRules[c];
-    const p = draft[c];
-    if (!law.covered) continue;
-    if (law.monthlyOvertimeCap !== null && p.monthlyLimit > law.monthlyOvertimeCap) {
-      warnings.push({ tone: "block", text: `${c}: a ${p.monthlyLimit}-hour monthly limit is above the legal cap of ${law.monthlyOvertimeCap} (${law.capNote}). The law is the ceiling (TM-1).` });
-    }
-    if (law.prerequisite && c === "JP" && p.allowed && !p.article36OnFile) {
-      warnings.push({ tone: "conflict", text: `JP: no ${law.prerequisite} on file, so overtime stays switched off for Japan-based workers until it's signed (TM-2).` });
-    }
-    const premium = Math.max(p.premiumPct, law.statutoryPremiumPct);
-    if (p.premiumPct < law.statutoryPremiumPct) warnings.push({ tone: "info", text: `${c}: the law requires at least a ${law.statutoryPremiumPct}% premium, so ${premium}% is paid.` });
-  }
+  const rows = guardrails({ ...demo.policy, overtime: draft }).filter((g) => g.area === "overtime");
+  const fix = (g: Guardrail) => setDraft(g.fix!.apply({ ...demo.policy, overtime: draft }).overtime);
 
   const save = () => {
     for (const c of countries) if (JSON.stringify(draft[c]) !== JSON.stringify(demo.policy.overtime[c])) demo.updateOvertimePolicy(c, draft[c]);
@@ -369,7 +428,7 @@ export function OvertimePolicyTab() {
             {countries.map((c) => {
               const law = timeRules[c];
               const p = draft[c];
-              const over = law.covered && law.monthlyOvertimeCap !== null && p.monthlyLimit > law.monthlyOvertimeCap;
+              const over = blocked(rows, c, "Monthly overtime limit");
               return (
                 <tr key={c} className="border-t border-line-soft align-middle">
                   <td className="py-2 pr-3 font-semibold">
@@ -399,7 +458,7 @@ export function OvertimePolicyTab() {
                     <input inputMode="numeric" value={p.monthlyBudget} onChange={(e) => set(c, { monthlyBudget: Number(e.target.value) || 0 })} className={cx(numCls, "w-28")} aria-label={`Budget ${c}`} />
                   </td>
                   <td className="py-2">
-                    <input inputMode="numeric" value={p.premiumPct} onChange={(e) => set(c, { premiumPct: Number(e.target.value) || 0 })} className={cx(numCls, "w-16")} aria-label={`Premium ${c}`} />
+                    <input inputMode="numeric" value={p.premiumPct} onChange={(e) => set(c, { premiumPct: Number(e.target.value) || 0 })} className={cx(numCls, "w-16", blocked(rows, c, "Overtime premium") && "border-danger text-danger")} aria-label={`Premium ${c}`} />
                     <span className="ml-1 text-muted">%</span>
                   </td>
                 </tr>
@@ -409,8 +468,84 @@ export function OvertimePolicyTab() {
         </table>
         <p className="mt-3 text-xs text-faint">Each worker&apos;s effective limit is the stricter of your limit and the legal cap (TM-4). Classification is set by Pebl HR, not here.</p>
       </Card>
-      <Warnings items={warnings} />
-      <SaveButton blocked={warnings.some((w) => w.tone === "block")} onClick={save} />
+      <PolicyCheck rows={rows} onFix={fix} />
+      <SaveButton blocked={rows.some((r) => r.status === "block")} onClick={save} />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Working hours
+// ---------------------------------------------------------------------------
+
+export function WorkingHoursTab() {
+  const demo = useDemo();
+  const [draft, setDraft] = useState(demo.policy.workingHours);
+  const set = (c: CountryCode, patch: Partial<WorkingHoursPolicy>) => setDraft({ ...draft, [c]: { ...draft[c], ...patch } });
+  const policy: ClientPolicy = { ...demo.policy, workingHours: draft };
+  const rows = guardrails(policy).filter((g) => g.area === "hours");
+  const fix = (g: Guardrail) => setDraft(g.fix!.apply(policy).workingHours);
+  const save = () => {
+    for (const c of countries) if (JSON.stringify(draft[c]) !== JSON.stringify(demo.policy.workingHours[c])) demo.updateWorkingHours(c, draft[c]);
+  };
+  const timeCls = "rounded-lg border border-line px-2 py-1 text-sm tabular";
+
+  return (
+    <div className="grid gap-5">
+      <Card className="overflow-x-auto p-5">
+        <p className="mb-3 text-sm text-muted">Your standard working day in each country. Employees&apos; timesheets are pre-filled from it, so it has to be legal before anyone works it.</p>
+        <table className="w-full min-w-[820px] text-sm">
+          <thead>
+            <tr className="text-left font-mono text-[11px] uppercase tracking-wide text-muted">
+              <th className="py-1.5 pr-3 font-medium">Country</th>
+              <th className="py-1.5 pr-3 font-medium">Start</th>
+              <th className="py-1.5 pr-3 font-medium">End</th>
+              <th className="py-1.5 pr-3 font-medium">Unpaid break</th>
+              <th className="py-1.5 pr-3 font-medium">Days / week</th>
+              <th className="py-1.5 pr-3 font-medium">Hours</th>
+              <th className="py-1.5 font-medium">The law</th>
+            </tr>
+          </thead>
+          <tbody>
+            {countries.map((c) => {
+              const law = timeRules[c];
+              const w = draft[c];
+              const day = scheduledDayHours(policy, c);
+              const dayBad = blocked(rows, c, "Working day") || blocked(rows, c, "Working week");
+              return (
+                <tr key={c} className="border-t border-line-soft align-middle">
+                  <td className="py-2 pr-3 font-semibold">{c}</td>
+                  <td className="py-2 pr-3">
+                    <input type="time" value={w.start} onChange={(e) => set(c, { start: e.target.value })} className={timeCls} aria-label={`Start ${c}`} />
+                  </td>
+                  <td className="py-2 pr-3">
+                    <input type="time" value={w.end} onChange={(e) => set(c, { end: e.target.value })} className={cx(timeCls, dayBad && "border-danger text-danger")} aria-label={`End ${c}`} />
+                  </td>
+                  <td className="py-2 pr-3">
+                    <input inputMode="numeric" value={w.breakMin} onChange={(e) => set(c, { breakMin: Number(e.target.value) || 0 })} className={cx(numCls, "w-16", blocked(rows, c, "Break") && "border-danger text-danger")} aria-label={`Break ${c}`} />
+                    <span className="ml-1 text-muted">min</span>
+                  </td>
+                  <td className="py-2 pr-3">
+                    <select value={w.daysPerWeek} onChange={(e) => set(c, { daysPerWeek: Number(e.target.value) })} className={cx("rounded-md border border-line px-2 py-1 text-sm", blocked(rows, c, "Working week") && "border-danger text-danger")} aria-label={`Days per week ${c}`}>
+                      {[4, 5, 6].map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className={cx("py-2 pr-3 font-mono text-xs tabular", dayBad ? "text-danger" : "text-muted")}>
+                    {Math.round(day * 10) / 10} / day · {Math.round(day * w.daysPerWeek * 10) / 10} / wk
+                  </td>
+                  <td className="py-2 text-xs text-muted">{law.covered ? law.scheduleNote : law.coverageNote}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </Card>
+      <PolicyCheck rows={rows} onFix={fix} />
+      <SaveButton blocked={rows.some((r) => r.status === "block")} onClick={save} />
     </div>
   );
 }

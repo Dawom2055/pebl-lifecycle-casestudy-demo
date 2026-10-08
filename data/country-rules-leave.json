@@ -126,6 +126,7 @@
         "shortMaxDays": 3,
         "documentAfterDays": 3,
         "pay": "Full pay for up to 6 weeks (continued pay)",
+        "minPaidDays": 30,
         "description": "A doctor's certificate is needed from the fourth day.",
         "illustrative": true
       },

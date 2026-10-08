@@ -35,7 +35,7 @@ export function TimePage({ onOpen }: { onOpen(id: string): void }) {
   const mine = demo.requests.filter((r) => (r.kind === "overtime" || r.kind === "timesheet") && r.workerId === worker.id);
 
   const [ot, setOt] = useState<OvertimeData>({ date: nextWorkingDay(DEMO_TODAY), hours: 2, reason: "" });
-  const [days, setDays] = useState<TimesheetDay[]>(() => prefillWeek(worker, demo.requests));
+  const [days, setDays] = useState<TimesheetDay[]>(() => prefillWeek(worker, demo.requests, demo.policy));
   const [note, setNote] = useState("");
   const [resultId, setResultId] = useState<string | null>(null);
   const result = resultId ? demo.requests.find((r) => r.id === resultId) : undefined;
@@ -48,7 +48,7 @@ export function TimePage({ onOpen }: { onOpen(id: string): void }) {
 
   const exempt = worker.classification === "salaried_exempt";
   const editDay = (date: string, patch: Partial<TimesheetDay>) => setDays((ds) => ds.map((d) => (d.date === date ? { ...d, ...patch } : d)));
-  const base = prefillWeek(worker, demo.requests);
+  const base = prefillWeek(worker, demo.requests, demo.policy);
 
   return (
     <>

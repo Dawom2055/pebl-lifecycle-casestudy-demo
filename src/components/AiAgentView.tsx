@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { client, countryRules, leaveRules, timeRules, workers } from "@/lib/data";
+import { client, countryRules, leaveRules, timeRules, unlockConfig, workers } from "@/lib/data";
+import { guardrails, type Guardrail } from "@/lib/engine/guardrails";
 import { convert, money } from "@/lib/format";
 import { useDemo } from "@/lib/store";
 import type { ClientPolicy, Combination, CountryCode } from "@/lib/types";
@@ -18,6 +19,14 @@ const TASKS: { id: Task; label: string; intake: string }[] = [
 
 const COUNTRIES: CountryCode[] = ["UK", "US", "CA", "DE", "JP"];
 
+type View = "prevention" | "assistance" | "pipeline" | "training";
+const VIEWS: { id: View; label: string }[] = [
+  { id: "prevention", label: "Prevention" },
+  { id: "assistance", label: "Assistance" },
+  { id: "pipeline", label: "How a request is checked" },
+  { id: "training", label: "AI Training" },
+];
+
 /** One rule as each layer sees it, and what's applied once both are combined. */
 interface Row {
   rule: string;
@@ -29,6 +38,7 @@ interface Row {
 /** The "Pebl AI" page: how one request is checked against country law and the client's policy. */
 export function AiAgentView() {
   const demo = useDemo();
+  const [view, setView] = useState<View>("prevention");
   const [task, setTask] = useState<Task>("expense");
   const [country, setCountry] = useState<CountryCode>("UK");
   const name = countryRules[country].name;
@@ -40,8 +50,17 @@ export function AiAgentView() {
     <AppShell>
       <PageHeader
         title="How the Pebl AI agent works"
-        sub="Every expense, leave request and timesheet runs through the same pipeline. It reads the country's law and the company's own policy, combines them, and routes the request so the outcome satisfies both."
+        sub="Pebl AI prevents a company from setting a policy that breaks local law, assists every person who touches a request, and checks each request against the law and the company's policy."
       />
+
+      <Picker<View> label="Show" value={view} onChange={setView} options={VIEWS} />
+      <div className="mb-6" />
+
+      {view === "prevention" && <Prevention />}
+      {view === "assistance" && <Assistance />}
+      {view === "training" && <Training />}
+      {view === "pipeline" && (
+        <>
 
       <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3">
         <Picker<Task> label="Task" value={task} onChange={setTask} options={TASKS.map((x) => ({ id: x.id, label: x.label }))} />
@@ -150,7 +169,384 @@ export function AiAgentView() {
         <Principle title="Rules decide">Country law and company policy are versioned rules, so the same request always gets the same answer, with an audit trail.</Principle>
         <Principle title="Trust is earned">A country and task only routes automatically after hundreds of shadow-mode cases agree with Pebl HR. Until then, HR decides.</Principle>
       </Card>
+        </>
+      )}
     </AppShell>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Prevention: rules researched by Pebl AI, verified by Pebl compliance, enforced on every
+// client policy before anyone works, travels or takes leave under it.
+// ---------------------------------------------------------------------------
+
+const RULE_STEPS: { tone: Tone; title: string; text: string }[] = [
+  { tone: "rules", title: "Official sources", text: "Labour codes, tax authorities and statutory guidance for each country: GOV.UK, the German ArbZG and BUrlG, the US Department of Labor, Japan's Labor Standards Act." },
+  { tone: "ai", title: "Pebl AI drafts the rule", text: "Reads the source and writes it as a rule the product can enforce: a value, a rule ID, a version, an effective date and the source it came from." },
+  { tone: "hr", title: "Pebl compliance verifies", text: "A specialist approves the rule before it goes live. When the law changes, the new version sends that country back to shadow mode until it proves itself again." },
+  { tone: "admin", title: "Locked into the product", text: "Every company policy, and every request, is checked against it. A company can be more generous than the law, never less." },
+];
+
+const AREA_LABEL: Record<Guardrail["area"], string> = { leave: "Leave", hours: "Working hours", overtime: "Overtime" };
+
+function Prevention() {
+  const demo = useDemo();
+  const [country, setCountry] = useState<CountryCode>("UK");
+  const all = guardrails(demo.policy);
+  const rows = all.filter((g) => g.country === country);
+  const checked = all.filter((g) => g.status === "ok" || g.status === "block");
+  const passing = checked.filter((g) => g.status === "ok").length;
+
+  return (
+    <div className="grid gap-8">
+      <section>
+        <h2 className="font-display text-xl font-extrabold">A policy that breaks local law can&apos;t be saved</h2>
+        <p className="mt-1 max-w-3xl text-sm text-muted">
+          When a company joins Pebl, its admin sets its own rules for leave, working hours, overtime and expenses. Pebl AI checks every setting against the law of each country the company employs people in, as it&apos;s typed. Anything below a legal minimum, or above a legal maximum, is blocked with the legal value one click away. Problems are stopped at the policy, before an employee ever submits a request under it.
+        </p>
+      </section>
+
+      <section>
+        <Eyebrow className="mb-3">How the rules get into the product</Eyebrow>
+        <ol className="grid gap-3 md:grid-cols-4">
+          {RULE_STEPS.map((st, i) => (
+            <li key={st.title} className={cx("rounded-2xl border-2 p-4", toneCls[st.tone].box)}>
+              <div className="flex items-center gap-2">
+                <span className={cx("grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white", toneCls[st.tone].dot)}>{i + 1}</span>
+                <h3 className="font-display font-bold">{st.title}</h3>
+              </div>
+              <p className="mt-2 text-sm text-muted">{st.text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <Eyebrow>What it checks · live against {client.name}&apos;s current policy</Eyebrow>
+            <p className="mt-1 text-sm">
+              <span className="font-semibold text-admin">
+                {passing} of {checked.length}
+              </span>{" "}
+              settings across five countries meet local law. Try breaking one under Client admin → Policy.
+            </p>
+          </div>
+          <Picker<CountryCode> label="Country" value={country} onChange={setCountry} options={COUNTRIES.map((c) => ({ id: c, label: countryRules[c].name.replace("United Kingdom", "UK").replace("United States", "US") }))} />
+        </div>
+        <Card className="overflow-x-auto p-0">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr className="text-left font-mono text-[11px] uppercase tracking-wide text-faint">
+                <th className="px-4 py-2.5 font-medium">Setting</th>
+                <th className="px-4 py-2.5 font-medium text-rules">The law</th>
+                <th className="px-4 py-2.5 font-medium text-admin">{client.name}</th>
+                <th className="px-4 py-2.5 font-medium">Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((g) => (
+                <tr key={g.setting} className="border-t border-line-soft align-top">
+                  <td className="px-4 py-2.5">
+                    <div className="font-semibold">{g.setting}</div>
+                    <div className="font-mono text-[11px] text-faint">
+                      {AREA_LABEL[g.area]}
+                      {g.rule ? ` · ${g.rule}` : ""}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2.5 text-muted">{g.law}</td>
+                  <td className="px-4 py-2.5 text-muted">{g.company}</td>
+                  <td className="px-4 py-2.5">
+                    <GuardStatus g={g} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      </section>
+
+      <section className="grid gap-3 md:grid-cols-3">
+        <Principle title="Fewer HR touches">A request built on an illegal policy becomes an HR exception later. Blocking the policy removes the exception before it exists.</Principle>
+        <Principle title="Faster approvals">When the policy is already legal, a request that follows it can clear on its own, with no one re-checking the law.</Principle>
+        <Principle title="Zero breaches">The law is a hard floor in the product, not a guideline. No admin can configure their way below it.</Principle>
+      </section>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Assistance: once the policy is legal, help each person act faster and get it right first time.
+// ---------------------------------------------------------------------------
+
+const ASSIST: { role: string; tone: Tone; goal: string; items: { title: string; text: string; tryIt: string }[] }[] = [
+  {
+    role: "Employee",
+    tone: "worker",
+    goal: "Gets it right first time, so nothing bounces to HR",
+    items: [
+      { title: "Reminders before deadlines", text: "Vacation days about to expire, a timesheet that's due, overtime close to the monthly limit, each with a button to fix it.", tryIt: "Employee → Home" },
+      { title: "Receipt reading", text: "Claude reads the merchant, amount, date and tax number, with a confidence score on each field.", tryIt: "Employee → New expense" },
+      { title: "Checks as you type", text: "Balances, public holidays, team overlap and overtime limits are shown before submitting, not after.", tryIt: "Employee → Leave or Time" },
+      { title: "Pre-filled timesheets", text: "Built from the company's working hours, approved overtime and leave, so most weeks are one click.", tryIt: "Employee → Time" },
+      { title: "Plain-language next steps", text: "Every request says what happens next, and exactly what to fix if something's missing.", tryIt: "Any submitted request" },
+    ],
+  },
+  {
+    role: "Client admin",
+    tone: "admin",
+    goal: "Decides in one tap, with the reasoning done",
+    items: [
+      { title: "AI suggestion on every card", text: "A recommendation and the reason: balance, expiring days, team coverage, cost and the month-end forecast.", tryIt: "Client admin → Decisions" },
+      { title: "Smarter alternatives", text: "Leave dates with no team overlap, or a partial overtime approval, instead of a flat no.", tryIt: "A vacation or overtime card" },
+      { title: "Disclaimers", text: "Compliant but unusual requests (over the meal cap, late, short notice) arrive flagged so the decision is informed.", tryIt: "As Muhammad, submit Meals, £62, 1 person" },
+      { title: "Pebl HR's note and Contact HR", text: "HR's resolution sits at the top of the request; a question for HR is one click away.", tryIt: "Any card → Details" },
+    ],
+  },
+  {
+    role: "Pebl HR",
+    tone: "hr",
+    goal: "Resolves each exception in minutes",
+    items: [
+      { title: "Similar past cases", text: "How many requests reached HR for the same reason, how they were resolved, and HR's usual note, applied in one click.", tryIt: "Pebl HR → any exception" },
+      { title: "Ask Pebl AI", text: "A chat that already knows the request, its checks, the law, the policy, past cases and the worker's history.", tryIt: "Request details → Ask Pebl AI" },
+      { title: "AI analysis and next step", text: "Why it was flagged, what passes, and one concrete next step.", tryIt: "Pebl HR → Exception queue" },
+      { title: "Official sources", text: "VAT checkers, labour codes and statutory leave pages for the worker's country and request type.", tryIt: "Request details → Need more info?" },
+      { title: "Forecast alerts", text: "A warning before a worker crosses the monthly overtime limit, not after.", tryIt: "Pebl HR → Exception queue" },
+    ],
+  },
+];
+
+function Assistance() {
+  return (
+    <div className="grid gap-8">
+      <section>
+        <h2 className="font-display text-xl font-extrabold">Help for every person who touches a request</h2>
+        <p className="mt-1 max-w-3xl text-sm text-muted">
+          Prevention keeps the policy legal. Assistance makes the work around it fast: employees submit requests that pass first time, admins decide with the reasoning done, and Pebl HR resolves exceptions with past cases and the law to hand. The AI suggests; people decide.
+        </p>
+      </section>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        {ASSIST.map((r) => (
+          <section key={r.role} className={cx("rounded-2xl border-2 p-4", toneCls[r.tone].box)}>
+            <div className="flex items-center gap-2">
+              <span className={cx("size-2.5 rounded-full", toneCls[r.tone].dot)} />
+              <h3 className="font-display text-lg font-bold">{r.role}</h3>
+            </div>
+            <p className={cx("mt-0.5 text-sm font-semibold", toneCls[r.tone].text)}>{r.goal}</p>
+            <ul className="mt-3 grid gap-2">
+              {r.items.map((it) => (
+                <li key={it.title} className="rounded-xl bg-surface px-3 py-2.5">
+                  <div className="text-sm font-semibold">{it.title}</div>
+                  <p className="mt-0.5 text-xs text-muted">{it.text}</p>
+                  <p className="mt-1 font-mono text-[11px] text-faint">Try: {it.tryIt}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+
+      <section className="grid gap-3 md:grid-cols-3">
+        <Principle title="Fewer HR touches">Reminders and checks before submitting stop problems becoming exceptions. Past cases and the chat cut the time spent on the ones that remain.</Principle>
+        <Principle title="Faster approvals">Admins approve from a card with the reasoning done; HR applies the usual resolution in one click.</Principle>
+        <Principle title="Zero breaches">Expiring-leave reminders protect the statutory minimum, and HR checks against official sources, not memory.</Principle>
+      </section>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// AI Training: shadow mode. The system earns autonomy one country and request type at a time,
+// by agreeing with Pebl HR on real requests before it's allowed to decide any on its own.
+// ---------------------------------------------------------------------------
+
+const TRAINING_STEPS: { tone: Tone; title: string; text: string }[] = [
+  {
+    tone: "rules",
+    title: "Shadow mode",
+    text: "For a new country and request type, the system makes its call on every request, but each one still goes to Pebl HR to decide, as it would without AI. Nothing is automated yet.",
+  },
+  {
+    tone: "ai",
+    title: "Every HR decision is scored",
+    text: "HR's decision is logged against what the system would have done. Matching calls build agreement. A request the system would have passed but HR denied is a miss.",
+  },
+  {
+    tone: "admin",
+    title: "Unlocked by evidence",
+    text: `At ${unlockConfig.thresholdPct}% agreement over at least ${unlockConfig.minCases} cases, with zero misses, it's ready. Pebl compliance unlocks it; a person makes the call, not the system.`,
+  },
+  {
+    tone: "hr",
+    title: "Audited after unlock",
+    text: `Requests now route on their own, and HR reviews a random ${unlockConfig.auditSamplePct}% of the ones it never saw. An issue sends it to compliance to review.`,
+  },
+  {
+    tone: "worker",
+    title: "Back to shadow when the law changes",
+    text: "A new rule version resets that country and request type to shadow mode. The evidence starts again, because past agreement was earned under the old rule.",
+  },
+];
+
+const ready = (c: Combination) => c.status === "shadow" && c.shadowCases >= unlockConfig.minCases && (c.agreements / Math.max(1, c.shadowCases)) * 100 >= unlockConfig.thresholdPct && c.misses === 0;
+
+function Training() {
+  const demo = useDemo();
+  const [country, setCountry] = useState<CountryCode>("UK");
+  const combos = demo.combinations.filter((c) => c.key.startsWith(`${country}:`));
+  const unlocked = demo.combinations.filter((c) => c.status === "unlocked").length;
+  const readyCount = demo.combinations.filter(ready).length;
+
+  return (
+    <div className="grid gap-8">
+      <section>
+        <h2 className="font-display text-xl font-extrabold">Pebl AI earns its autonomy, one country and request type at a time</h2>
+        <p className="mt-1 max-w-3xl text-sm text-muted">
+          Laws differ by country and request type, so the system is trained on each one separately: UK meals, German travel, Japanese overtime. It learns from Pebl HR&apos;s real decisions in shadow mode and only decides on its own once the evidence says it agrees with HR, with no compliance misses.
+        </p>
+      </section>
+
+      <section>
+        <Eyebrow className="mb-3">The lifecycle</Eyebrow>
+        <ol className="grid gap-3 md:grid-cols-5">
+          {TRAINING_STEPS.map((st, i) => (
+            <li key={st.title} className={cx("rounded-2xl border-2 p-4", toneCls[st.tone].box)}>
+              <div className="flex items-center gap-2">
+                <span className={cx("grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold text-white", toneCls[st.tone].dot)}>{i + 1}</span>
+                <h3 className="font-display text-sm font-bold">{st.title}</h3>
+              </div>
+              <p className="mt-2 text-xs text-muted">{st.text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2">
+        <Card className="p-4">
+          <Eyebrow className="mb-2">How a decision is scored</Eyebrow>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left font-mono text-[11px] uppercase tracking-wide text-faint">
+                <th className="py-1.5 pr-3 font-medium">System would have</th>
+                <th className="py-1.5 pr-3 font-medium">HR decided</th>
+                <th className="py-1.5 font-medium">Scored as</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["Cleared it or sent it on", "Cleared / sent on", "Agreement", "text-admin"],
+                ["Cleared it or sent it on", "Asked for information", "Disagreement", "text-hr"],
+                ["Cleared it or sent it on", "Denied", "Miss: blocks unlocking", "text-danger"],
+                ["Flagged it for HR", "Anything", "Agreement", "text-admin"],
+              ].map(([a, b, c, cls]) => (
+                <tr key={a + b} className="border-t border-line-soft">
+                  <td className="py-1.5 pr-3 text-muted">{a}</td>
+                  <td className="py-1.5 pr-3 text-muted">{b}</td>
+                  <td className={cx("py-1.5 font-semibold", cls)}>{c}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs text-muted">A miss is the system being too lenient, so even one keeps it in shadow mode. Being too cautious only costs HR time.</p>
+        </Card>
+        <Card className="p-4">
+          <Eyebrow className="mb-2">Where it stands today</Eyebrow>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <Stat value={unlocked} label="Unlocked" cls="text-admin" />
+            <Stat value={readyCount} label="Ready to unlock" cls="text-ai" />
+            <Stat value={demo.combinations.length - unlocked - readyCount} label="Still training" cls="text-rules" />
+          </div>
+          <p className="mt-3 text-xs text-muted">
+            Try it: decide a shadow-mode request as Pebl HR (e.g. as Lukas, submit a Travel expense of €79.90) and watch its case count rise, or unlock a ready one under Pebl HR → Trust dashboard.
+          </p>
+        </Card>
+      </section>
+
+      <section>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <Eyebrow>Training progress · live</Eyebrow>
+          <Picker<CountryCode> label="Country" value={country} onChange={setCountry} options={COUNTRIES.map((c) => ({ id: c, label: countryRules[c].name.replace("United Kingdom", "UK").replace("United States", "US") }))} />
+        </div>
+        {combos.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-line p-4 text-sm text-muted">Nothing in training for {countryRules[country].name} yet. Its rules aren&apos;t verified, so Pebl HR handles every request by hand.</p>
+        ) : (
+          <Card className="overflow-x-auto p-0">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="text-left font-mono text-[11px] uppercase tracking-wide text-faint">
+                  <th className="px-4 py-2.5 font-medium">Country · type</th>
+                  <th className="px-4 py-2.5 font-medium">Cases</th>
+                  <th className="px-4 py-2.5 font-medium">Agreement</th>
+                  <th className="px-4 py-2.5 font-medium">Misses</th>
+                  <th className="px-4 py-2.5 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {combos.map((c) => {
+                  const rate = (c.agreements / Math.max(1, c.shadowCases)) * 100;
+                  const isReady = ready(c);
+                  return (
+                    <tr key={c.key} className="border-t border-line-soft align-middle">
+                      <td className="px-4 py-2.5 font-mono text-xs">{c.key}</td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-24 overflow-hidden rounded-full bg-sunken">
+                            <div className={cx("h-full", c.shadowCases >= unlockConfig.minCases ? "bg-admin" : "bg-rules")} style={{ width: `${Math.min(100, (c.shadowCases / unlockConfig.minCases) * 100)}%` }} />
+                          </div>
+                          <span className="font-mono text-xs tabular text-muted">
+                            {c.shadowCases}/{unlockConfig.minCases}
+                          </span>
+                        </div>
+                      </td>
+                      <td className={cx("px-4 py-2.5 font-mono text-xs tabular", rate >= unlockConfig.thresholdPct ? "text-admin" : "text-muted")}>{c.shadowCases ? `${rate.toFixed(1)}%` : "–"}</td>
+                      <td className={cx("px-4 py-2.5 font-mono text-xs tabular", c.misses ? "text-danger" : "text-muted")}>{c.misses}</td>
+                      <td className="px-4 py-2.5">
+                        <span className={cx("rounded-full px-2 py-0.5 text-xs font-semibold", c.status === "unlocked" ? "bg-admin-bg text-admin" : isReady ? "bg-ai-bg text-ai" : "bg-rules-bg text-rules")}>
+                          {c.status === "unlocked" ? "Unlocked" : isReady ? "Ready to unlock" : "Shadow mode"}
+                        </span>
+                        {c.resetReason && <p className="mt-1 text-xs text-muted">Reset: {c.resetReason}</p>}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </Card>
+        )}
+      </section>
+
+      <section className="grid gap-3 md:grid-cols-3">
+        <Principle title="Zero breaches">Nothing is automated until it has matched HR hundreds of times with no misses, and a law change puts it straight back in training.</Principle>
+        <Principle title="Fewer HR touches over time">Each unlock removes a whole country and request type from HR&apos;s queue, apart from the 5% audit.</Principle>
+        <Principle title="Faster approvals">Once unlocked, compliant requests clear in seconds instead of waiting for a specialist.</Principle>
+      </section>
+    </div>
+  );
+}
+
+function Stat({ value, label, cls }: { value: number; label: string; cls: string }) {
+  return (
+    <div>
+      <div className={cx("font-display text-2xl font-extrabold tabular", cls)}>{value}</div>
+      <div className="text-xs text-muted">{label}</div>
+    </div>
+  );
+}
+
+function GuardStatus({ g }: { g: Guardrail }) {
+  const m = {
+    ok: { text: "Meets the law", cls: "bg-admin-bg text-admin" },
+    block: { text: "Blocked", cls: "bg-danger-bg text-danger" },
+    locked: { text: "Set by law", cls: "bg-rules-bg text-rules" },
+    info: { text: "Note", cls: "bg-hr-bg text-hr" },
+  }[g.status];
+  return (
+    <div>
+      <span className={cx("rounded-full px-2 py-0.5 text-xs font-semibold", m.cls)}>{m.text}</span>
+      {g.message && <p className="mt-1 text-xs text-muted">{g.message}</p>}
+    </div>
   );
 }
 
@@ -226,7 +622,7 @@ function layersFor(task: Task, c: CountryCode, policy: ClientPolicy): { covered:
         {
           rule: "Sick leave",
           law: law.sick ? `${law.sick.pay}. Note needed after ${law.sick.documentAfterDays} days` : "–",
-          company: `${p.sickPaidDays} paid days`,
+          company: `${p.sickPaidDays[c]} paid days`,
           applied: "Protected: approved automatically once unlocked; the manager is told, not asked",
         },
         {

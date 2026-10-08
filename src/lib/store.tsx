@@ -22,9 +22,10 @@ import type {
   Role,
   TimesheetData,
   Worker,
+  WorkingHoursPolicy,
 } from "./types";
 
-const STORAGE_KEY = "pebl-demo-v3";
+const STORAGE_KEY = "pebl-demo-v4";
 
 export type Section = string;
 
@@ -139,6 +140,7 @@ interface Store extends DemoState {
   updateExpensePolicy(patch: Partial<ExpensePolicy>): void;
   updateLeavePolicy(patch: Partial<LeavePolicy>): void;
   updateOvertimePolicy(country: CountryCode, patch: Partial<OvertimeCountryPolicy>): void;
+  updateWorkingHours(country: CountryCode, patch: Partial<WorkingHoursPolicy>): void;
   setClassification(workerId: string, c: Worker["classification"]): void;
   unlockCombination(key: string): void;
   resetCombination(key: string, reason: string): void;
@@ -436,6 +438,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       updateLeavePolicy: (patch) => {
         commit((s) => ({ ...s, policy: bump({ ...s.policy, leave: { ...s.policy.leave, ...patch } }) }));
         toast("Leave policy saved as a new version.");
+      },
+      updateWorkingHours: (country, patch) => {
+        commit((s) => ({ ...s, policy: bump({ ...s.policy, workingHours: { ...s.policy.workingHours, [country]: { ...s.policy.workingHours[country], ...patch } } }) }));
+        toast("Working hours saved as a new version. New timesheets are pre-filled from them.");
       },
       updateOvertimePolicy: (country, patch) => {
         commit((s) => ({ ...s, policy: bump({ ...s.policy, overtime: { ...s.policy.overtime, [country]: { ...s.policy.overtime[country], ...patch } } }) }));

@@ -1,7 +1,8 @@
 import { client, countryRules, getWorker, leaveRules, timeRules } from "../data";
 import { titleOf, valueOf } from "../describe";
 import { money } from "../format";
-import type { AnyRequest, ClientPolicy } from "../types";
+import type { AnyRequest, ClientPolicy, Combination } from "../types";
+import { pct, PRECEDENT_WINDOW_DAYS, similarCases } from "./precedents";
 import { leaveLabel } from "./leave";
 
 /**
@@ -10,8 +11,9 @@ import { leaveLabel } from "./leave";
  * request type, and the worker's other requests. Built in the browser (where the demo's state
  * lives) and sent to the chat route as data.
  */
-export function chatContext(req: AnyRequest, policy: ClientPolicy, requests: AnyRequest[]) {
+export function chatContext(req: AnyRequest, policy: ClientPolicy, requests: AnyRequest[], combinations: Combination[] = []) {
   const worker = getWorker(req.workerId);
+  const similar = similarCases(req, requests, combinations);
   const country = worker.country;
   const others = requests.filter((r) => r.workerId === worker.id && r.id !== req.id);
 
@@ -44,6 +46,21 @@ export function chatContext(req: AnyRequest, policy: ClientPolicy, requests: Any
     auditTrail: req.history.map((h) => `${h.at} · ${h.actor} (${h.role}): ${h.action}${h.note ? ` · "${h.note}"` : ""}`),
     countryLaw: countryLaw(req),
     companyPolicy: companyPolicy(req, policy),
+    similarCases: similar
+      ? similar.type === "shadow"
+        ? { reason: "Shadow mode", combination: similar.combination, hrAgreedWithSystem: `${similar.agreements} of ${similar.cases}`, systemWouldHave: similar.would }
+        : {
+            reason: similar.reason,
+            windowDays: PRECEDENT_WINDOW_DAYS,
+            cases: similar.cases,
+            cleared: similar.cleared,
+            askedForInfo: similar.askedInfo,
+            denied: similar.denied,
+            medianMinutesToResolve: similar.medianMinutes,
+            usualNote: similar.usualNote,
+            decidedThisSession: similar.inSession,
+          }
+      : null,
     workerHistory: {
       otherRequests: others.length,
       approved: others.filter((r) => r.status === "approved").length,
@@ -113,6 +130,7 @@ export const SUGGESTED: { id: string; question: string }[] = [
   { id: "why", question: "Why did this come to Pebl HR?" },
   { id: "law", question: `What does the country's law say here?` },
   { id: "recommend", question: "What would you recommend?" },
+  { id: "similar", question: "How were similar cases handled?" },
   { id: "history", question: "What's this worker's history?" },
 ];
 
@@ -136,6 +154,13 @@ export function fallbackAnswer(id: string, ctx: ChatContext): string {
       const base = a ? `${a.text}${a.suggestedAction ? `\n\nSuggested next step: ${a.suggestedAction}` : ""}` : "There's no AI analysis on this request yet.";
       const note = fails.length ? `\n\nFailing checks to resolve first: ${fails.map((f) => f.check.toLowerCase()).join(", ")}.` : "\n\nNo checks fail outright, so if the flagged reason checks out, it can be sent on.";
       return base + note;
+    }
+    case "similar": {
+      const s = ctx.similarCases;
+      if (!s) return "I don't have similar past cases for this one.";
+      if ("hrAgreedWithSystem" in s) return `${s.combination} is in shadow mode. HR agreed with the system's call in ${s.hrAgreedWithSystem} past cases. Here, the system would have ${s.systemWouldHave}.`;
+      if (!s.cases) return "No past cases on record for this flag yet.";
+      return `${s.cases} requests reached HR for the same reason (${s.reason}) in the last ${s.windowDays} days: ${pct(s.cleared, s.cases)} cleared, ${pct(s.askedForInfo, s.cases)} needed more information, ${pct(s.denied, s.cases)} denied. They usually took ${s.medianMinutesToResolve} minutes.\n\nHR's usual note: "${s.usualNote}"`;
     }
     case "history": {
       const h = ctx.workerHistory;

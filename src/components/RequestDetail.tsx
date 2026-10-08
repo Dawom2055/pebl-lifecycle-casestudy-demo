@@ -10,6 +10,7 @@ import { hrLinksFor } from "@/lib/hr-links";
 import { useDemo } from "@/lib/store";
 import type { AnyRequest, LeaveRequest, OvertimeRequest, Role, TimesheetRequest } from "@/lib/types";
 import { RequestChat } from "./RequestChat";
+import { SimilarCases } from "./SimilarCases";
 import { AdvisoryNote, ChecksList, ExplanationCard, OvertimeMeter, PipelineTrace, ReceiptView, SignalsList, TimesheetTable } from "./request-parts";
 import { Button, cx, Eyebrow, Modal, Required, StatusBadge } from "./ui";
 
@@ -41,6 +42,8 @@ export function RequestDetail({ req, role, onClose, onFix }: { req: AnyRequest |
           label={role === "hr" ? "AI analysis for HR" : role === "admin" ? (req.routing.outcome === "manager" ? "AI suggestion" : "AI summary") : "What happens next"}
           tone={role === "hr" ? "hr" : "ai"}
         />
+
+        {role === "hr" && <SimilarCases req={req} onDone={onClose} />}
 
         <RequestActions req={req} role={role} onDone={onClose} onFix={onFix} />
 

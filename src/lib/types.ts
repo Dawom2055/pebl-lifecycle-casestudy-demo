@@ -332,7 +332,7 @@ export interface ExpensePolicy {
 export interface LeavePolicy {
   vacationDays: Record<CountryCode, number>;
   carryoverMaxDays: number;
-  sickPaidDays: number;
+  sickPaidDays: Record<CountryCode, number>;
   noticeDays: number;
   blackouts: { start: string; end: string; label: string }[];
   maxConsecutiveDays: number;
@@ -353,11 +353,20 @@ export interface OvertimeCountryPolicy {
   article36OnFile?: boolean;
 }
 
+/** The company's standard working day in one country. Timesheets are pre-filled from it. */
+export interface WorkingHoursPolicy {
+  start: string;
+  end: string;
+  breakMin: number;
+  daysPerWeek: number;
+}
+
 export interface ClientPolicy {
   version: string;
   effectiveFrom: string;
   expenses: ExpensePolicy;
   leave: LeavePolicy;
+  workingHours: Record<CountryCode, WorkingHoursPolicy>;
   overtime: Record<CountryCode, OvertimeCountryPolicy>;
 }
 

@@ -130,7 +130,7 @@ export function evaluateOvertime(
   const law = L.law;
   const st = overtimeStatus(worker, requests, policy, { excludeId: selfId, asOf });
   const checks: RuleCheck[] = [];
-  const sched = workerTime[worker.id].schedule;
+  const sched = policy.workingHours[worker.country];
   const cur = worker.currency;
   const hours = data.hours;
 
@@ -299,8 +299,8 @@ export function routeOvertime(worker: Worker, evaluation: Evaluation, policy: Cl
 // ---------------------------------------------------------------------------
 
 /** Pre-fills the week from the standard schedule plus approved overtime and approved leave (TM-9). */
-export function prefillWeek(worker: Worker, requests: AnyRequest[], weekStart = CURRENT_WEEK): TimesheetDay[] {
-  const sched = workerTime[worker.id].schedule;
+export function prefillWeek(worker: Worker, requests: AnyRequest[], policy: ClientPolicy, weekStart = CURRENT_WEEK): TimesheetDay[] {
+  const sched = policy.workingHours[worker.country];
   const holidays = new Map(leaveRules[worker.country].publicHolidays.map((h) => [h.date, h.name]));
   return weekDays(weekStart).map((date) => {
     const leave = requests.find((r): r is LeaveRequest => r.kind === "leave" && r.workerId === worker.id && r.status === "approved" && date >= r.data.start && date <= r.data.end);

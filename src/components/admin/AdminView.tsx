@@ -14,7 +14,7 @@ import { RequestActions, RequestDetail } from "../RequestDetail";
 import { RequestTable } from "../RequestTable";
 import { AdvisoryNote, AiSource, CheckIcon, OvertimeMeter } from "../request-parts";
 import { Button, Card, cx, Empty, PageHeader, SparkIcon } from "../ui";
-import { ExpensePolicyTab, LeavePolicyTab, OvertimePolicyTab } from "./PolicyTabs";
+import { ExpensePolicyTab, LeavePolicyTab, OvertimePolicyTab, WorkingHoursTab } from "./PolicyTabs";
 
 type Filter = "all" | "expense" | "leave" | "time";
 const inFilter = (r: AnyRequest, f: Filter) => f === "all" || (f === "time" ? r.kind === "overtime" || r.kind === "timesheet" : r.kind === f);
@@ -369,7 +369,7 @@ function TeamPage({ onOpen }: { onOpen(id: string): void }) {
 
 function PolicyPage() {
   const demo = useDemo();
-  const [tab, setTab] = useState<"expense" | "leave" | "time">("expense");
+  const [tab, setTab] = useState<"expense" | "leave" | "hours" | "time">("expense");
   return (
     <>
       <PageHeader
@@ -381,6 +381,7 @@ function PolicyPage() {
           [
             ["expense", "Expenses"],
             ["leave", "Leave"],
+            ["hours", "Working hours"],
             ["time", "Overtime"],
           ] as const
         ).map(([id, label]) => (
@@ -397,6 +398,7 @@ function PolicyPage() {
       </div>
       {tab === "expense" && <ExpensePolicyTab />}
       {tab === "leave" && <LeavePolicyTab />}
+      {tab === "hours" && <WorkingHoursTab />}
       {tab === "time" && <OvertimePolicyTab />}
     </>
   );

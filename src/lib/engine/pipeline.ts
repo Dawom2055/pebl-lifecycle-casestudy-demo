@@ -141,7 +141,7 @@ export function buildSeedRequests(policy: ClientPolicy, combinations: Combinatio
   }
   for (const s of seedTimesheets) {
     const worker = getWorker(s.workerId);
-    const days = prefillWeek(worker, out, s.weekStart).map((d) => ({ ...d, ...(s.edits[d.date] ?? {}) }));
+    const days = prefillWeek(worker, out, policy, s.weekStart).map((d) => ({ ...d, ...(s.edits[d.date] ?? {}) }));
     const req = runTimesheetPipeline({ ...ctx(s), data: { weekStart: s.weekStart, days, note: "" } });
     for (const d of s.decisions) applySeedDecision(req, d);
     out.push(req);

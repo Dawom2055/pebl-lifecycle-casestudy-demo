@@ -1,0 +1,27 @@
+{
+  "_note": "Illustrative: how Pebl HR resolved past exceptions over the last 90 days, by request type and the flag that sent them to HR. 'cleared' means approved (leave) or sent to the client admin (expenses, time). usualNote is the resolution note HR most often wrote. Shadow-mode cases use the agreement counts in unlock-status.json instead.",
+  "windowDays": 90,
+  "cases": {
+    "expense:duplicate": { "cases": 18, "cleared": 4, "askedInfo": 9, "denied": 5, "medianMinutes": 12, "usualAction": "request_info", "usualNote": "This looks like the same receipt another colleague claimed. Can you confirm who paid, so one of the claims can be withdrawn?" },
+    "expense:repeat_fix": { "cases": 23, "cleared": 9, "askedInfo": 11, "denied": 3, "medianMinutes": 6, "usualAction": "request_info", "usualNote": "The receipt still doesn't show the supplier's tax number. Could you ask the supplier for a full tax invoice and upload it?" },
+    "expense:cross_check": { "cases": 37, "cleared": 30, "askedInfo": 6, "denied": 1, "medianMinutes": 5, "usualAction": "clear", "usualNote": "Checked the receipt by hand: the confirmed amount matches once the tip is included." },
+    "expense:low_confidence": { "cases": 52, "cleared": 47, "askedInfo": 5, "denied": 0, "medianMinutes": 3, "usualAction": "clear", "usualNote": "Checked the blurry fields against the receipt by hand; they match." },
+    "expense:amount": { "cases": 214, "cleared": 201, "askedInfo": 10, "denied": 3, "medianMinutes": 4, "usualAction": "clear", "usualNote": "Business purpose confirmed; receipt and tax number are valid. Sent on for your approval." },
+    "expense:admin_referral": { "cases": 11, "cleared": 9, "askedInfo": 2, "denied": 0, "medianMinutes": 9, "usualAction": "clear", "usualNote": "Checked against local rules: this expense is compliant. Whether to approve the spend is your call." },
+    "leave:tier": { "cases": 61, "cleared": 58, "askedInfo": 3, "denied": 0, "medianMinutes": 15, "usualAction": "clear", "usualNote": "Entitlement and statutory pay confirmed; supporting document on file." },
+    "leave:rules_fail": { "cases": 29, "cleared": 12, "askedInfo": 11, "denied": 6, "medianMinutes": 10, "usualAction": "request_info", "usualNote": "These dates clash with a company rule (a blackout or the maximum run of days). Could you move them, or should we ask your manager for an exception?" },
+    "leave:duration": { "cases": 14, "cleared": 13, "askedInfo": 1, "denied": 0, "medianMinutes": 8, "usualAction": "clear", "usualNote": "Long absence confirmed with the manager; cover is arranged." },
+    "leave:risky_decline": { "cases": 9, "cleared": 8, "askedInfo": 1, "denied": 0, "medianMinutes": 20, "usualAction": "clear", "usualNote": "Agreed alternative dates with the manager so the days are used before they lapse." },
+    "leave:no_rule": { "cases": 33, "cleared": 31, "askedInfo": 2, "denied": 0, "medianMinutes": 12, "usualAction": "clear", "usualNote": "Checked the provincial entitlement; the request is within it." },
+    "leave:admin_referral": { "cases": 7, "cleared": 6, "askedInfo": 1, "denied": 0, "medianMinutes": 11, "usualAction": "clear", "usualNote": "The worker is entitled to this leave under local law. Timing is your call; declining could leave days unused." },
+    "overtime:no_rule": { "cases": 12, "cleared": 11, "askedInfo": 1, "denied": 0, "medianMinutes": 6, "usualAction": "clear", "usualNote": "Checked provincial hours rules; this overtime is within them." },
+    "overtime:admin_referral": { "cases": 6, "cleared": 5, "askedInfo": 1, "denied": 0, "medianMinutes": 7, "usualAction": "clear", "usualNote": "Within the legal cap and the company limit. Approving is your call on budget and workload." },
+    "timesheet:limit": { "cases": 26, "cleared": 26, "askedInfo": 0, "denied": 0, "medianMinutes": 6, "usualAction": "clear", "usualNote": "Pay all hours at the overtime rate. This took the month over the limit: please review workload with the manager." },
+    "timesheet:rest": { "cases": 19, "cleared": 19, "askedInfo": 0, "denied": 0, "medianMinutes": 7, "usualAction": "clear", "usualNote": "Pay all hours. The rest-period breach is recorded; please review scheduling with the manager." },
+    "timesheet:rules_fail": { "cases": 21, "cleared": 20, "askedInfo": 1, "denied": 0, "medianMinutes": 6, "usualAction": "clear", "usualNote": "Pay all hours. The break or daily-limit breach is recorded and raised with the manager." },
+    "timesheet:anomaly": { "cases": 17, "cleared": 15, "askedInfo": 2, "denied": 0, "medianMinutes": 5, "usualAction": "clear", "usualNote": "Long day confirmed with the worker; all hours are paid." },
+    "timesheet:rules_borderline": { "cases": 12, "cleared": 12, "askedInfo": 0, "denied": 0, "medianMinutes": 4, "usualAction": "clear", "usualNote": "Long week noted; all hours are paid." },
+    "timesheet:no_rule": { "cases": 10, "cleared": 10, "askedInfo": 0, "denied": 0, "medianMinutes": 5, "usualAction": "clear", "usualNote": "Checked provincial hours rules; all hours are paid." },
+    "timesheet:admin_referral": { "cases": 5, "cleared": 5, "askedInfo": 0, "denied": 0, "medianMinutes": 6, "usualAction": "clear", "usualNote": "Hours worked must be paid. The pattern is within the law; the workload is your call." }
+  }
+}

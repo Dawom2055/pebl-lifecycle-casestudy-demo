@@ -24,7 +24,7 @@ export function RequestChat({ req }: { req: AnyRequest }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
-  const context = useMemo(() => chatContext(req, demo.policy, demo.requests), [req, demo.policy, demo.requests]);
+  const context = useMemo(() => chatContext(req, demo.policy, demo.requests, demo.combinations), [req, demo.policy, demo.requests, demo.combinations]);
   const bottom = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

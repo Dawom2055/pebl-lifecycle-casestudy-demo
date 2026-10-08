@@ -3,6 +3,9 @@
   "countries": {
     "UK": {
       "covered": true,
+      "scheduleMaxDailyHours": null,
+      "scheduleMaxWeeklyHours": 48,
+      "scheduleNote": "A 48-hour average working week; a worker can opt out in writing.",
       "id": "UK-TM-WTR",
       "version": "2026.1",
       "effectiveFrom": "2026-01-01",
@@ -22,6 +25,9 @@
     },
     "DE": {
       "covered": true,
+      "scheduleMaxDailyHours": 10,
+      "scheduleMaxWeeklyHours": 48,
+      "scheduleNote": "At most 10 hours a day (8 on average) over a six-day week.",
       "id": "DE-TM-ARBZG",
       "version": "2026.1",
       "effectiveFrom": "2026-01-01",
@@ -41,6 +47,9 @@
     },
     "US": {
       "covered": true,
+      "scheduleMaxDailyHours": null,
+      "scheduleMaxWeeklyHours": null,
+      "scheduleNote": "No federal limit on scheduled hours; hours over 40 a week are paid at 1.5x.",
       "id": "US-TM-FLSA",
       "version": "2026.1",
       "effectiveFrom": "2026-01-01",
@@ -61,6 +70,9 @@
     },
     "JP": {
       "covered": true,
+      "scheduleMaxDailyHours": 8,
+      "scheduleMaxWeeklyHours": 40,
+      "scheduleNote": "Statutory working hours are 8 a day and 40 a week. More than that is overtime and needs an Article 36 agreement.",
       "id": "JP-TM-ART36",
       "version": "2026.1",
       "effectiveFrom": "2026-04-01",

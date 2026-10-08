@@ -85,7 +85,7 @@ export function leaveBalances(worker: Worker, requests: AnyRequest[], policy: Cl
 
   const out: Balance[] = [
     make("vacation", p.vacationDays[worker.country], rules.vacation?.minimumDays ? `Legal minimum ${rules.vacation.minimumDays} days` : "Company policy"),
-    make("sick", p.sickPaidDays, "Company-paid days this year"),
+    make("sick", Math.max(p.sickPaidDays[worker.country], rules.sick?.minPaidDays ?? 0), rules.sick?.minPaidDays ? `Legal minimum ${rules.sick.minPaidDays} days` : "Company-paid days this year"),
     make("floating", p.perks.floating.days, "Company perk"),
     make("birthday", p.perks.birthday.days, "Company perk"),
     make("volunteer", p.perks.volunteer.days, "Company perk"),

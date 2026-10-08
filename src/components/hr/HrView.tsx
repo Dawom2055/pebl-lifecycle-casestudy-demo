@@ -7,7 +7,9 @@ import { money } from "@/lib/format";
 import { overtimeStatus } from "@/lib/engine/time";
 import { useDemo } from "@/lib/store";
 import type { AnyRequest, Classification, Combination } from "@/lib/types";
+import { similarCases } from "@/lib/engine/precedents";
 import { AppShell } from "../AppShell";
+import { similarSummary } from "../SimilarCases";
 import { RequestDetail } from "../RequestDetail";
 import { RequestTable } from "../RequestTable";
 import { Button, Card, cx, Empty, Eyebrow, PageHeader, SparkIcon } from "../ui";
@@ -149,6 +151,8 @@ function inTab(r: AnyRequest, tab: QueueTab) {
 }
 
 function QueueItem({ req, history, onOpen }: { req: AnyRequest; history: AnyRequest[]; onOpen(): void }) {
+  const demo = useDemo();
+  const similar = similarSummary(req, similarCases(req, demo.requests, demo.combinations));
   const w = getWorker(req.workerId);
   const e = req.explanations.hr;
   const flags = req.routing.signals.filter((s) => s.id !== "not_unlocked");
@@ -190,6 +194,7 @@ function QueueItem({ req, history, onOpen }: { req: AnyRequest; history: AnyRequ
         <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-start">
           <span className="font-display text-xl font-extrabold tabular">{valueOf(req)}</span>
           <span className="text-xs text-muted">Worker history: {approved} approved</span>
+          {similar && <span className="max-w-[220px] text-right text-xs font-semibold text-rules">{similar}</span>}
         </div>
       </Card>
     </button>

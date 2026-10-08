@@ -18,7 +18,7 @@
   "leave": {
     "vacationDays": { "UK": 25, "US": 20, "DE": 28, "JP": 15, "CA": 15 },
     "carryoverMaxDays": 3,
-    "sickPaidDays": 10,
+    "sickPaidDays": { "UK": 10, "US": 10, "DE": 30, "JP": 10, "CA": 10 },
     "noticeDays": 14,
     "blackouts": [{ "start": "2026-11-02", "end": "2026-11-06", "label": "Q4 product launch week" }],
     "maxConsecutiveDays": 15,
@@ -31,6 +31,13 @@
       "birthday": { "days": 1, "tier": "auto" },
       "volunteer": { "days": 2, "tier": "manager" }
     }
+  },
+  "workingHours": {
+    "UK": { "start": "09:00", "end": "17:30", "breakMin": 30, "daysPerWeek": 5 },
+    "US": { "start": "09:00", "end": "17:30", "breakMin": 30, "daysPerWeek": 5 },
+    "CA": { "start": "08:30", "end": "17:00", "breakMin": 30, "daysPerWeek": 5 },
+    "DE": { "start": "08:30", "end": "17:00", "breakMin": 30, "daysPerWeek": 5 },
+    "JP": { "start": "09:00", "end": "18:00", "breakMin": 60, "daysPerWeek": 5 }
   },
   "overtime": {
     "UK": { "allowed": true, "monthlyLimit": 20, "annualLimit": 160, "mode": "pre_approval", "monthlyBudget": 4000, "premiumPct": 25 },

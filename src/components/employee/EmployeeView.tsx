@@ -5,13 +5,14 @@ import { getWorker } from "@/lib/data";
 import { titleOf } from "@/lib/describe";
 import { money } from "@/lib/format";
 import { leaveBalances } from "@/lib/engine/leave";
+import { nudgesFor } from "@/lib/engine/nudges";
 import { overtimeStatus, sheetFor } from "@/lib/engine/time";
 import { useDemo } from "@/lib/store";
 import type { AnyRequest, ExpenseRequest, LeaveRequest } from "@/lib/types";
 import { AppShell } from "../AppShell";
 import { RequestDetail } from "../RequestDetail";
 import { RequestTable } from "../RequestTable";
-import { Button, Card, Eyebrow, PageHeader, StatusBadge } from "../ui";
+import { Button, Card, cx, Eyebrow, PageHeader, SparkIcon, StatusBadge } from "../ui";
 import { LeavePage } from "./LeavePage";
 import { NewExpense } from "./NewExpense";
 import { TimePage } from "./TimePage";
@@ -87,6 +88,7 @@ function Home({ mine, attention, onOpen }: { mine: AnyRequest[]; attention: AnyR
   const vacation = leaveBalances(w, demo.requests, demo.policy).find((b) => b.type === "vacation")!;
   const ot = overtimeStatus(w, demo.requests, demo.policy);
   const sheet = sheetFor(w.id, demo.requests);
+  const nudges = nudgesFor(w, demo.requests, demo.policy);
 
   return (
     <>
@@ -96,6 +98,25 @@ function Home({ mine, attention, onOpen }: { mine: AnyRequest[]; attention: AnyR
         <Stat label="In progress" value={String(inFlight.length)} />
         <Stat label="Expenses approved, to payroll" value={money(approvedTotal, w.currency)} />
       </div>
+
+      {nudges.length > 0 && (
+        <section className="mt-6">
+          <Eyebrow className="mb-2 flex items-center gap-1.5">
+            <SparkIcon className="text-ai" /> Reminders from Pebl AI
+          </Eyebrow>
+          <div className="grid gap-2 md:grid-cols-2">
+            {nudges.map((n) => (
+              <div key={n.id} className={cx("flex flex-col rounded-xl border px-4 py-3", n.tone === "hr" ? "border-hr/40 bg-hr-bg" : n.tone === "admin" ? "border-admin/40 bg-admin-bg" : "border-worker/40 bg-worker-bg")}>
+                <div className="font-semibold">{n.title}</div>
+                <p className="mt-0.5 flex-1 text-sm text-muted">{n.text}</p>
+                <Button variant="worker" size="sm" className="mt-2 self-start" onClick={() => demo.setSection("employee", n.action.section)}>
+                  {n.action.label}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {attention.length > 0 && (
         <section className="mt-6">

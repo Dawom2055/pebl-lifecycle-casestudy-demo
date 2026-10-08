@@ -99,7 +99,7 @@ expect("same, 2 days unpaid -> manager", split.routing.outcome, "manager");
 
 console.log("--- Time (Muhammad, UK)");
 expect("overtime hours left this month", overtimeStatus(m, seeds, seedPolicy).remaining, 6);
-const pre = prefillWeek(m, seeds);
+const pre = prefillWeek(m, seeds, seedPolicy);
 const sheet = (id: string, edits: Record<string, Partial<TimesheetDay>>) =>
   runTimesheetPipeline({ id, workerId: m.id, data: { weekStart: "2026-10-05", note: "", days: pre.map((d) => ({ ...d, ...(edits[d.date] ?? {}) })) }, ...ctx(seeds) });
 const a = sheet("TS-A", {});
