@@ -115,7 +115,7 @@ export function RequestDetail({ req, role, onClose, onFix }: { req: AnyRequest |
           <p className="mt-2 text-xs text-faint">Every decision stores its inputs, the rule versions used, the routing signals and who acted.</p>
         </section>
 
-        {role === "hr" && <RequestChat key={req.id} req={req} />}
+        {(role === "hr" || role === "admin") && <RequestChat key={req.id} req={req} reader={role} />}
       </div>
     </Modal>
   );

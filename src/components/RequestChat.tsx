@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { chatContext, fallbackAnswer, SUGGESTED } from "@/lib/engine/chat-context";
+import { chatContext, fallbackAnswer, suggestedFor, type ChatReader } from "@/lib/engine/chat-context";
 import { useDemo } from "@/lib/store";
 import type { AnyRequest } from "@/lib/types";
 import { cx, SparkIcon } from "./ui";
@@ -14,17 +14,18 @@ interface Turn {
 }
 
 /**
- * "Ask Pebl AI" for Pebl HR: a chat about the open request. It's given the full request context
- * (checks, signals, audit trail, country law, company policy, the worker's history). Without
- * Claude, the suggested questions are still answered from that context.
+ * "Ask Pebl AI": a chat about the open request, for Pebl HR or the client admin. It's given the
+ * full request context (checks, signals, audit trail, country law, company policy, the worker's
+ * history), plus what that reader needs. Without Claude, the suggested questions are still
+ * answered from that context.
  */
-export function RequestChat({ req }: { req: AnyRequest }) {
+export function RequestChat({ req, reader = "hr" }: { req: AnyRequest; reader?: ChatReader }) {
   const demo = useDemo();
   const [open, setOpen] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
-  const context = useMemo(() => chatContext(req, demo.policy, demo.requests, demo.combinations), [req, demo.policy, demo.requests, demo.combinations]);
+  const context = useMemo(() => chatContext(req, demo.policy, demo.requests, demo.combinations, reader), [req, demo.policy, demo.requests, demo.combinations, reader]);
   const bottom = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -100,15 +101,15 @@ export function RequestChat({ req }: { req: AnyRequest }) {
 
           <div className="flex-1 overflow-y-auto px-4 py-4">
             <p className="text-sm text-muted">
-              I&apos;ve read this request: every rule check, why it was routed here, the audit trail, {context.worker.country}&apos;s rules, {context.client}&apos;s policy and{" "}
-              {context.worker.name.split(" ")[0]}&apos;s other requests. Ask me anything. You make the decision.
+              I&apos;ve read this request: every rule check, {reader === "admin" ? "any disclaimers" : "why it was routed here"}, the audit trail, {context.worker.country}&apos;s rules, {context.client}&apos;s policy and{" "}
+              {context.worker.name.split(" ")[0]}&apos;s other requests. Ask me anything. You make the decision{reader === "admin" ? "; for legal questions, use Contact HR" : ""}.
             </p>
             {demo.aiConnected === false && (
               <p className="mt-2 rounded-lg bg-sunken px-3 py-2 text-xs text-muted">Claude isn&apos;t connected, so the suggested questions are answered straight from the request data.</p>
             )}
 
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {SUGGESTED.map((s) => (
+              {suggestedFor(reader).map((s) => (
                 <button
                   key={s.id}
                   disabled={pending}
@@ -122,7 +123,7 @@ export function RequestChat({ req }: { req: AnyRequest }) {
 
             <ol className="mt-4 grid gap-3">
               {turns.map((t, i) => (
-                <li key={i} className={cx("max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm", t.role === "user" ? "justify-self-end bg-hr text-white" : "justify-self-start border border-line bg-surface")}>
+                <li key={i} className={cx("max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm", t.role === "user" ? cx("justify-self-end text-white", reader === "admin" ? "bg-admin" : "bg-hr") : "justify-self-start border border-line bg-surface")}>
                   <p className="whitespace-pre-wrap">{t.content}</p>
                   {t.role === "assistant" && <p className="mt-1 font-mono text-[10.5px] uppercase tracking-wide text-faint">{t.source === "claude" ? "Written by Claude" : "From the request data"}</p>}
                 </li>

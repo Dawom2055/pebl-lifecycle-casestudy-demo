@@ -5,19 +5,23 @@ import type { AnyRequest, ClientPolicy, Combination } from "../types";
 import { pct, PRECEDENT_WINDOW_DAYS, similarCases } from "./precedents";
 import { leaveLabel } from "./leave";
 
+export type ChatReader = "hr" | "admin";
+
 /**
- * Everything the HR chat knows about one request: the request itself, the worker, every rule
- * check and routing signal, the audit trail, the country's law and the client's policy for this
- * request type, and the worker's other requests. Built in the browser (where the demo's state
- * lives) and sent to the chat route as data.
+ * Everything the chat knows about one request: the request itself, the worker, every rule check
+ * and routing signal, the audit trail, the country's law and the client's policy for this request
+ * type, and the worker's other requests. Pebl HR also gets its own analysis and similar past
+ * cases; the client admin gets its own AI summary instead. Built in the browser (where the demo's
+ * state lives) and sent to the chat route as data.
  */
-export function chatContext(req: AnyRequest, policy: ClientPolicy, requests: AnyRequest[], combinations: Combination[] = []) {
+export function chatContext(req: AnyRequest, policy: ClientPolicy, requests: AnyRequest[], combinations: Combination[] = [], reader: ChatReader = "hr") {
   const worker = getWorker(req.workerId);
-  const similar = similarCases(req, requests, combinations);
+  const similar = reader === "hr" ? similarCases(req, requests, combinations) : null;
   const country = worker.country;
   const others = requests.filter((r) => r.workerId === worker.id && r.id !== req.id);
 
   return {
+    reader,
     request: {
       id: req.id,
       type: req.kind,
@@ -42,7 +46,8 @@ export function chatContext(req: AnyRequest, policy: ClientPolicy, requests: Any
       signals: req.routing.signals.map((s) => `${s.label}: ${s.detail}`),
       disclaimersForClientAdmin: (req.routing.advisories ?? []).map((s) => `${s.label}: ${s.detail}`),
     },
-    aiAnalysisForHr: req.explanations.hr ? { text: req.explanations.hr.text, suggestedAction: req.explanations.hr.suggestedAction } : null,
+    aiAnalysisForHr: reader === "hr" && req.explanations.hr ? { text: req.explanations.hr.text, suggestedAction: req.explanations.hr.suggestedAction } : null,
+    aiSummaryForAdmin: reader === "admin" && req.explanations.admin ? { suggestion: req.explanations.admin.headline ?? null, text: req.explanations.admin.text } : null,
     auditTrail: req.history.map((h) => `${h.at} · ${h.actor} (${h.role}): ${h.action}${h.note ? ` · "${h.note}"` : ""}`),
     countryLaw: countryLaw(req),
     companyPolicy: companyPolicy(req, policy),
@@ -126,13 +131,24 @@ function companyPolicy(req: AnyRequest, policy: ClientPolicy) {
 // connected, so the chat still works in the demo.
 // ---------------------------------------------------------------------------
 
-export const SUGGESTED: { id: string; question: string }[] = [
-  { id: "why", question: "Why did this come to Pebl HR?" },
-  { id: "law", question: `What does the country's law say here?` },
-  { id: "recommend", question: "What would you recommend?" },
-  { id: "similar", question: "How were similar cases handled?" },
-  { id: "history", question: "What's this worker's history?" },
-];
+const SUGGESTED: Record<ChatReader, { id: string; question: string }[]> = {
+  hr: [
+    { id: "why", question: "Why did this come to Pebl HR?" },
+    { id: "law", question: "What does the country's law say here?" },
+    { id: "recommend", question: "What would you recommend?" },
+    { id: "similar", question: "How were similar cases handled?" },
+    { id: "history", question: "What's this worker's history?" },
+  ],
+  admin: [
+    { id: "why_admin", question: "Why is this on my card?" },
+    { id: "recommend_admin", question: "Should I approve this?" },
+    { id: "decline", question: "What happens if I decline?" },
+    { id: "law", question: "What does the country's law say here?" },
+    { id: "history", question: "What's this worker's history?" },
+  ],
+};
+
+export const suggestedFor = (reader: ChatReader) => SUGGESTED[reader];
 
 export function fallbackAnswer(id: string, ctx: ChatContext): string {
   const r = ctx.routing;
@@ -161,6 +177,35 @@ export function fallbackAnswer(id: string, ctx: ChatContext): string {
       if ("hrAgreedWithSystem" in s) return `${s.combination} is in shadow mode. HR agreed with the system's call in ${s.hrAgreedWithSystem} past cases. Here, the system would have ${s.systemWouldHave}.`;
       if (!s.cases) return "No past cases on record for this flag yet.";
       return `${s.cases} requests reached HR for the same reason (${s.reason}) in the last ${s.windowDays} days: ${pct(s.cleared, s.cases)} cleared, ${pct(s.askedForInfo, s.cases)} needed more information, ${pct(s.denied, s.cases)} denied. They usually took ${s.medianMinutesToResolve} minutes.\n\nHR's usual note: "${s.usualNote}"`;
+    }
+    case "why_admin": {
+      const disclaimers = r.disclaimersForClientAdmin;
+      const hrReviewed = ctx.auditTrail.some((h) => h.includes("(hr)"));
+      const lead =
+        r.outcome === "manager"
+          ? ctx.request.type === "timesheet" ? "It passed every legal check. It has overtime that wasn’t pre-approved, so you confirm it; the hours must be paid either way." : `It passed every legal check, and ${ctx.request.type === "leave" ? "the timing of planned leave" : "approving overtime"} is your call.`
+          : hrReviewed
+            ? "Pebl HR has reviewed it and sent it on: the business decision is yours."
+            : "It passed every compliance check, so it's waiting on your approval.";
+      return disclaimers.length ? `${lead}\n\nFor your decision, Pebl AI flagged:\n${disclaimers.map((d) => `• ${d}`).join("\n")}` : lead;
+    }
+    case "recommend_admin": {
+      const a = ctx.aiSummaryForAdmin;
+      const base = a ? `${a.suggestion ? `Suggestion: ${a.suggestion}. ` : ""}${a.text}` : "There's no AI summary on this request yet.";
+      const flags = r.disclaimersForClientAdmin.length ? `\n\nIt's compliant, so the flags (${r.disclaimersForClientAdmin.map((d) => d.split(":")[0].toLowerCase()).join(", ")}) are about your own policy, not the law.` : "";
+      return `${base}${flags}\n\nIf you're unsure about the law, use Contact HR before deciding.`;
+    }
+    case "decline": {
+      switch (ctx.request.type) {
+        case "expense":
+          return "The employee sees your reason and isn't reimbursed. Write a reason they can act on, such as asking for a split bill or a business purpose.";
+        case "leave":
+          return "You'll need a reason, and you can suggest other dates instead. Managers decide when leave happens, not whether the employee is entitled to it. If declining would make the employee lose leave they're legally owed, the decline goes to Pebl HR rather than straight through.";
+        case "overtime":
+          return "The employee shouldn't work those hours. Give a reason, or approve fewer hours if that works.";
+        default:
+          return "Hours already worked must be paid, so a timesheet can't be refused. You can confirm it and add a note, for example asking for overtime to be requested in advance next time.";
+      }
     }
     case "history": {
       const h = ctx.workerHistory;
