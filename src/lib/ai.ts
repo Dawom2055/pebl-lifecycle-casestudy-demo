@@ -22,6 +22,8 @@ function getClient() {
 export async function claudeJson<T>(opts: {
   system: string;
   content: Anthropic.Beta.BetaContentBlockParam[];
+  /** A whole conversation instead of one user turn (the last message must be from the user). */
+  messages?: Anthropic.Beta.BetaMessageParam[];
   schema: Record<string, unknown>;
   effort?: "low" | "medium" | "high";
   maxTokens?: number;
@@ -32,7 +34,7 @@ export async function claudeJson<T>(opts: {
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
     system: opts.system,
-    messages: [{ role: "user", content: opts.content }],
+    messages: opts.messages ?? [{ role: "user", content: opts.content }],
     output_config: {
       effort: opts.effort ?? "low",
       format: { type: "json_schema", schema: opts.schema },

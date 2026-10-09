@@ -9,6 +9,7 @@ import { leaveLabel, teamLeave } from "@/lib/engine/leave";
 import { overtimeLimits, overtimeStatus } from "@/lib/engine/time";
 import { useDemo } from "@/lib/store";
 import type { AnyRequest, CheckStatus, ExpenseRequest, LeaveRequest, OvertimeRequest, TimesheetRequest } from "@/lib/types";
+import { Alfie } from "../Alfie";
 import { AppShell } from "../AppShell";
 import { RequestActions, RequestDetail } from "../RequestDetail";
 import { RequestTable } from "../RequestTable";
@@ -33,6 +34,7 @@ export function AdminView() {
 
   return (
     <AppShell
+      aside={<Alfie role="admin" onOpen={setOpen} className="h-full" />}
       nav={[
         { id: "decisions", label: "Decisions", count: pending.length || undefined },
         { id: "updates", label: "Updates", count: updates.length || undefined },

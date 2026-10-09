@@ -9,6 +9,7 @@ import { nudgesFor } from "@/lib/engine/nudges";
 import { overtimeStatus, sheetFor } from "@/lib/engine/time";
 import { useDemo } from "@/lib/store";
 import type { AnyRequest, ExpenseRequest, LeaveRequest } from "@/lib/types";
+import { Alfie } from "../Alfie";
 import { AppShell } from "../AppShell";
 import { RequestDetail } from "../RequestDetail";
 import { RequestTable } from "../RequestTable";
@@ -44,6 +45,7 @@ export function EmployeeView() {
 
   return (
     <AppShell
+      aside={<Alfie role="employee" onOpen={setOpen} className="h-full" />}
       nav={[
         { id: "home", label: "Home", count: attention.length || undefined },
         { id: "expenses", label: "Expenses" },

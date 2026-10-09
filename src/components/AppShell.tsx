@@ -21,7 +21,7 @@ export interface NavItem {
 }
 
 /** The page frame. Without `nav`, the page has no sidebar (the Pebl AI page). */
-export function AppShell({ nav, children }: { nav?: NavItem[]; children: ReactNode }) {
+export function AppShell({ nav, children, aside }: { nav?: NavItem[]; children: ReactNode; aside?: ReactNode }) {
   const demo = useDemo();
   const [confirmReset, setConfirmReset] = useState(false);
   const section = demo.section[demo.role];
@@ -78,7 +78,7 @@ export function AppShell({ nav, children }: { nav?: NavItem[]; children: ReactNo
       {!nav ? (
         <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-6 sm:px-6">{children}</main>
       ) : (
-        <div className="mx-auto grid w-full max-w-[1240px] flex-1 gap-6 px-4 py-6 sm:px-6 md:grid-cols-[220px_minmax(0,1fr)]">
+        <div className={cx("mx-auto grid w-full flex-1 gap-6 px-4 py-6 sm:px-6 md:grid-cols-[220px_minmax(0,1fr)]", aside ? "max-w-[1640px] xl:grid-cols-[210px_minmax(0,1fr)_380px]" : "max-w-[1240px]")}>
           <aside className="grid content-start gap-4">
             <Persona />
             <nav aria-label="Sections" className="flex gap-1 overflow-x-auto md:grid md:overflow-visible">
@@ -104,6 +104,7 @@ export function AppShell({ nav, children }: { nav?: NavItem[]; children: ReactNo
             </nav>
           </aside>
           <main className="min-w-0">{children}</main>
+          {aside && <div className="h-[560px] md:col-span-2 xl:sticky xl:top-[76px] xl:col-span-1 xl:h-[calc(100vh-100px)] xl:self-start">{aside}</div>}
         </div>
       )}
 

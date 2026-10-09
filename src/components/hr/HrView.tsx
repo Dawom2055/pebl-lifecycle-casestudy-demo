@@ -12,6 +12,7 @@ import { AppShell } from "../AppShell";
 import { similarSummary } from "../SimilarCases";
 import { RequestDetail } from "../RequestDetail";
 import { RequestTable } from "../RequestTable";
+import { Alfie } from "../Alfie";
 import { Button, Card, cx, Empty, Eyebrow, PageHeader, SparkIcon } from "../ui";
 
 export function HrView() {
@@ -34,6 +35,7 @@ export function HrView() {
 
   return (
     <AppShell
+      aside={<Alfie role="hr" onOpen={setOpen} className="h-full" />}
       nav={[
         { id: "queue", label: "Exception queue", count: queue.length || undefined },
         { id: "audit", label: "5% audit", count: auditOpen.length || undefined },
@@ -129,7 +131,7 @@ export function HrView() {
           <RequestTable rows={demo.requests} onOpen={setOpen} showWorker />
         </>
       )}
-      <RequestDetail req={openReq} role="hr" onClose={() => setOpen(null)} />
+      <RequestDetail req={openReq} role="hr" onClose={() => setOpen(null)} onOpen={setOpen} />
     </AppShell>
   );
 }

@@ -10,6 +10,7 @@ import { hrLinksFor } from "@/lib/hr-links";
 import { useDemo } from "@/lib/store";
 import type { AnyRequest, LeaveRequest, OvertimeRequest, Role, TimesheetRequest } from "@/lib/types";
 import { RequestChat } from "./RequestChat";
+import { Alfie } from "./Alfie";
 import { SimilarCases } from "./SimilarCases";
 import { AdvisoryNote, ChecksList, ExplanationCard, OvertimeMeter, PipelineTrace, ReceiptView, SignalsList, TimesheetTable } from "./request-parts";
 import { Button, cx, Eyebrow, Modal, Required, StatusBadge } from "./ui";
@@ -17,14 +18,16 @@ import { Button, cx, Eyebrow, Modal, Required, StatusBadge } from "./ui";
 const audienceFor = { employee: "worker", admin: "admin", hr: "hr" } as const;
 
 /** Full view of one request: what each stage decided, and the actions open to the current role. */
-export function RequestDetail({ req, role, onClose, onFix }: { req: AnyRequest | null; role: Role; onClose(): void; onFix?(req: AnyRequest): void }) {
+export function RequestDetail({ req, role, onClose, onFix, onOpen }: { req: AnyRequest | null; role: Role; onClose(): void; onFix?(req: AnyRequest): void; onOpen?(id: string): void }) {
   if (!req) return null;
   const worker = getWorker(req.workerId);
   const explanation = req.explanations[audienceFor[role]] ?? req.explanations.worker;
+  const agent = role === "hr";
 
   return (
-    <Modal open onClose={onClose} title={`${req.id} · ${titleOf(req)}`} wide>
-      <div className="grid gap-6">
+    <Modal open onClose={onClose} title={`${req.id} · ${titleOf(req)}`} wide xwide={agent}>
+      <div className={cx(agent && "grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]")}>
+      <div className="grid min-w-0 gap-6">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <StatusBadge status={req.status} />
           <span className="font-display text-2xl font-extrabold tabular">{valueOf(req)}</span>
@@ -115,7 +118,9 @@ export function RequestDetail({ req, role, onClose, onFix }: { req: AnyRequest |
           <p className="mt-2 text-xs text-faint">Every decision stores its inputs, the rule versions used, the routing signals and who acted.</p>
         </section>
 
-        {(role === "hr" || role === "admin") && <RequestChat key={req.id} req={req} reader={role} />}
+        {role === "admin" && <RequestChat key={req.id} req={req} reader="admin" />}
+      </div>
+      {agent && <Alfie role="hr" key={req.id} focus={req} onOpen={onOpen} className="h-[520px] lg:sticky lg:top-[68px] lg:h-[calc(92vh-100px)] lg:self-start" />}
       </div>
     </Modal>
   );

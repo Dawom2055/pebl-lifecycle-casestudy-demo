@@ -285,6 +285,7 @@ const ASSIST: { role: string; tone: Tone; goal: string; items: { title: string; 
     tone: "worker",
     goal: "Gets it right first time, so nothing bounces to HR",
     items: [
+      { title: "Alfie, the AI agent", text: "Submits overtime, leave and the weekly timesheet from a sentence, through the same checks as the forms, and answers questions about balances and rules.", tryIt: "Employee → right-hand panel → Request 2 hours of overtime" },
       { title: "Reminders before deadlines", text: "Vacation days about to expire, a timesheet that's due, overtime close to the monthly limit, each with a button to fix it.", tryIt: "Employee → Home" },
       { title: "Receipt reading", text: "Claude reads the merchant, amount, date and tax number, with a confidence score on each field.", tryIt: "Employee → New expense" },
       { title: "Checks as you type", text: "Balances, public holidays, team overlap and overtime limits are shown before submitting, not after.", tryIt: "Employee → Leave or Time" },
@@ -297,6 +298,7 @@ const ASSIST: { role: string; tone: Tone; goal: string; items: { title: string; 
     tone: "admin",
     goal: "Decides in one tap, with the reasoning done",
     items: [
+      { title: "Alfie, the AI agent", text: "Looks up any employee, summarizes what's waiting, approves clean requests in one go, drafts declines to confirm, and asks Pebl HR.", tryIt: "Client admin → right-hand panel → Tell me about Priya Shah" },
       { title: "AI suggestion on every card", text: "A recommendation and the reason: balance, expiring days, team coverage, cost and the month-end forecast.", tryIt: "Client admin → Decisions" },
       { title: "Smarter alternatives", text: "Leave dates with no team overlap, or a partial overtime approval, instead of a flat no.", tryIt: "A vacation or overtime card" },
       { title: "Disclaimers", text: "Compliant but unusual requests (over the meal cap, late, short notice) arrive flagged so the decision is informed.", tryIt: "As Muhammad, submit Meals, £62, 1 person" },
@@ -309,7 +311,7 @@ const ASSIST: { role: string; tone: Tone; goal: string; items: { title: string; 
     goal: "Resolves each exception in minutes",
     items: [
       { title: "Similar past cases", text: "How many requests reached HR for the same reason, how they were resolved, and HR's usual note, applied in one click.", tryIt: "Pebl HR → any exception" },
-      { title: "Ask Pebl AI", text: "A chat that already knows the request, its checks, the law, the policy, past cases and the worker's history.", tryIt: "Request details → Ask Pebl AI" },
+      { title: "Alfie, the AI agent", text: "Always open beside HR's work. It does the task, not just answers: messages the employee, sends a request to the admin, drafts a denial for HR to confirm, and answers questions about the request, policy and law.", tryIt: "Pebl HR → right-hand panel, or any request" },
       { title: "AI analysis and next step", text: "Why it was flagged, what passes, and one concrete next step.", tryIt: "Pebl HR → Exception queue" },
       { title: "Official sources", text: "VAT checkers, labour codes and statutory leave pages for the worker's country and request type.", tryIt: "Request details → Need more info?" },
       { title: "Forecast alerts", text: "A warning before a worker crosses the monthly overtime limit, not after.", tryIt: "Pebl HR → Exception queue" },

@@ -134,7 +134,7 @@ export function ConfidencePill({ value }: { value: number }) {
   return <span className={cx("rounded px-1.5 py-px font-mono text-[11px] tabular", cls)}>{pct}%</span>;
 }
 
-export function Modal({ open, onClose, title, children, wide }: { open: boolean; onClose(): void; title: string; children: ReactNode; wide?: boolean }) {
+export function Modal({ open, onClose, title, children, wide, xwide }: { open: boolean; onClose(): void; title: string; children: ReactNode; wide?: boolean; xwide?: boolean }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/30 p-0 sm:items-center sm:p-6" onClick={onClose}>
@@ -143,7 +143,7 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
         aria-modal
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
-        className={cx("max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-bg shadow-2xl sm:rounded-2xl", wide ? "sm:max-w-4xl" : "sm:max-w-lg")}
+        className={cx("max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-bg shadow-2xl sm:rounded-2xl", xwide ? "sm:max-w-[1240px]" : wide ? "sm:max-w-4xl" : "sm:max-w-lg")}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-line bg-bg/95 px-5 py-3 backdrop-blur">
           <h2 className="truncate text-lg font-bold">{title}</h2>
